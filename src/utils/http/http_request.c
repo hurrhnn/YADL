@@ -118,7 +118,7 @@ int callback_http(struct lws *wsi, enum lws_callback_reasons reason,
 
                 if (http_payload->response_body_len >= http_payload->current_response_len) {
                     http_payload->current_response_len += YADL_LARGE_SIZE;
-                    *http_payload->response_body = yadl_realloc(http_payload->response_body,
+                    *http_payload->response_body = yadl_realloc(*http_payload->response_body,
                                                            http_payload->current_response_len);
                 }
                 memcpy(*http_payload->response_body + before_data_len, in, len);
@@ -214,7 +214,7 @@ http_request(const char *method, const char *URL, char *header, char *cookie, co
     memset(http_payload, 0, sizeof(struct http_payload));
 
     char **response_body = yadl_malloc(sizeof(void *));
-    *response_body = malloc(YADL_LARGE_SIZE);
+    *response_body = yadl_malloc(YADL_LARGE_SIZE, true);
     http_result->response_body = response_body;
     http_result->response_code = -1;
 
