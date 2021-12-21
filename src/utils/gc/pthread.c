@@ -21,35 +21,39 @@
 #include "pthread.h"
 #include "gc.h"
 
-void *yadl_pthread_create(void *function, void *args) {
-    yadl_pthread_context_t *pthread_context = malloc(sizeof(yadl_pthread_context_t));
-    *pthread_context = (yadl_pthread_context_t) {malloc(sizeof(pthread_t)),
-                                                 malloc(sizeof(pthread_attr_t)),
-                                                 malloc(sizeof(pthread_mutex_t)),
-                                                 malloc(sizeof(pthread_cond_t))};
+void *yadl_pthread_create(void *function, pthread_attr_t *pthread_attr, void *args) {
+    yadl_pthread_context_t *pthread_context = yadl_malloc(sizeof(yadl_pthread_context_t), true);
+    if(pthread_attr == NULL) {
+        pthread_attr = yadl_malloc(sizeof(pthread_attr_t), true);
+        pthread_attr_init(pthread_attr);
+    }
+    *pthread_context = (yadl_pthread_context_t) {yadl_malloc(sizeof(pthread_t), true),
+                                                 pthread_attr,
+                                                 yadl_malloc(sizeof(pthread_mutex_t), true),
+                                                 yadl_malloc(sizeof(pthread_cond_t), true)};
 
-    pthread_attr_init(pthread_context->pthread_attr);
     pthread_mutex_init(pthread_context->pthread_mutex, NULL);
     pthread_cond_init(pthread_context->pthread_cond, NULL);
 
-    pthread_attr_setstacksize(pthread_context->pthread_attr, YADL_LARGE_SIZE * 2);
+    pthread_attr_setstacksize(pthread_context->pthread_attr, YADL_LARGE_SIZE * 10);
     pthread_create(pthread_context->pthread, pthread_context->pthread_attr, function, args);
 
-    if (yadl_gc_get_context_value(YADL_GC_NODE_PTHREAD) != NULL)
+    if (yadl_gc_get_context(YADL_GC_NODE_PTHREAD) != NULL)
         yadl_gc_append(pthread_context, YADL_GC_NODE_PTHREAD);
     return pthread_context;
 }
 
 void yadl_pthread_append(pthread_t pthread) {
-    yadl_pthread_context_t *pthread_context = malloc(sizeof(yadl_pthread_context_t));
-    *pthread_context = (yadl_pthread_context_t) {malloc(sizeof(pthread_t)), NULL, NULL, NULL};
+    yadl_pthread_context_t *pthread_context = yadl_malloc(sizeof(yadl_pthread_context_t), true);
+    *pthread_context = (yadl_pthread_context_t) {yadl_malloc(sizeof(pthread_t), true), NULL, NULL, NULL};
     memcpy(pthread_context->pthread, &pthread, sizeof(pthread_t));
     yadl_gc_append(pthread_context, YADL_GC_NODE_PTHREAD);
 }
 
 void yadl_thread_remove(yadl_pthread_context_t *pthread_context) {
-    free(pthread_context->pthread);
-    free(pthread_context->pthread_attr);
-    free(pthread_context->pthread_mutex);
-    free(pthread_context->pthread_cond);
+    gc_node_t *non_gc_node = yadl_gc_get_context((int8_t) YADL_NON_GC_NODE);
+    delete_node(non_gc_node, pthread_context->pthread, (int8_t)YADL_NON_GC_NODE);
+    delete_node(non_gc_node, pthread_context->pthread_attr, (int8_t)YADL_NON_GC_NODE);
+    delete_node(non_gc_node, pthread_context->pthread_mutex, (int8_t)YADL_NON_GC_NODE);
+    delete_node(non_gc_node, pthread_context->pthread_cond, (int8_t)YADL_NON_GC_NODE);
 }

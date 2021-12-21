@@ -39,7 +39,7 @@ typedef struct yadl_pthread_context {
     pthread_cond_t *pthread_cond;
 } yadl_pthread_context_t;
 
-void *yadl_pthread_create(void *function, void *args);
+void *yadl_pthread_create(void *function, pthread_attr_t *pthread_attr, void *args);
 
 void yadl_pthread_append(pthread_t pthread);
 
