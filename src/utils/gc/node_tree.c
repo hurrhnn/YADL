@@ -27,13 +27,13 @@
 #include "node_tree.h"
 #include "gc.h"
 
-#if __linux__ /* pho`six Y E A H */
+#if __linux__
 pthread_mutex_t node_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
-#else
+#else /* pho`six Y E A H */
 pthread_mutex_t node_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
 #endif
 
-gc_node_t *insert_node(gc_node_t *gc_node, void *address, bool node) {
+gc_node_t *insert_node(gc_node_t *gc_node, void *address) {
     pthread_mutex_lock(&node_mutex);
     gc_node_t *new_node, **target, *return_value = NULL;
 
@@ -47,7 +47,7 @@ gc_node_t *insert_node(gc_node_t *gc_node, void *address, bool node) {
         else
             target = &gc_node->right;
 
-        *target = insert_node(*target, address, node);
+        *target = insert_node(*target, address);
         (*target)->parent = gc_node;
         return_value = gc_node;
     }
@@ -55,7 +55,7 @@ gc_node_t *insert_node(gc_node_t *gc_node, void *address, bool node) {
     return return_value;
 }
 
-u_int8_t delete_node(gc_node_t *gc_node, void *address, bool node) {
+u_int8_t delete_node(gc_node_t *gc_node, void *address, int8_t node) {
     pthread_mutex_lock(&node_mutex);
 
     gc_node_t *entry = NULL, **prev_pos = NULL, *target = NULL;
@@ -101,21 +101,13 @@ u_int8_t delete_node(gc_node_t *gc_node, void *address, bool node) {
     return 0;
 }
 
-gc_node_t *search_node(gc_node_t *gc_node, void *address, bool node) {
+gc_node_t *search_node(gc_node_t *gc_node, void *address, int8_t node) {
     pthread_mutex_lock(&node_mutex);
     gc_node_t *result = NULL, *return_value = NULL;
     if (address == NULL || gc_node == NULL) {
         return_value = NULL;
     } else {
-        if (node == YADL_GC_NODE_ADDRESS) {
-            if (address == gc_node->address)
-                return_value = gc_node;
-            else if (address < gc_node->address)
-                result = gc_node->left;
-
-            else if (gc_node->address < address)
-                result = gc_node->right;
-        } else {
+        if (node == YADL_GC_NODE_PTHREAD) {
             if (*((yadl_pthread_context_t *) address)->pthread ==
                 *((yadl_pthread_context_t *) gc_node->address)->pthread) {
                 return_value = gc_node;
@@ -126,6 +118,14 @@ gc_node_t *search_node(gc_node_t *gc_node, void *address, bool node) {
                        *((yadl_pthread_context_t *) address)->pthread) {
                 result = gc_node->right;
             }
+        } else {
+            if (address == gc_node->address)
+                return_value = gc_node;
+            else if (address < gc_node->address)
+                result = gc_node->left;
+
+            else if (gc_node->address < address)
+                result = gc_node->right;
         }
         if (return_value == NULL)
             return_value = search_node(result, address, node);
@@ -135,7 +135,7 @@ gc_node_t *search_node(gc_node_t *gc_node, void *address, bool node) {
     return return_value;
 }
 
-void scan_node(gc_node_t *main_node, gc_node_t *sub_node, bool node) {
+void scan_node(gc_node_t *main_node, gc_node_t *sub_node, int8_t node) {
     pthread_mutex_lock(&node_mutex);
 
     if (main_node->left != NULL)
@@ -143,8 +143,8 @@ void scan_node(gc_node_t *main_node, gc_node_t *sub_node, bool node) {
 
     if (node == YADL_GC_NODE_PTHREAD) {
         if (pthread_kill(*((yadl_pthread_context_t *) main_node->address)->pthread, 0) != 0) { // if target thread was dead
-            delete_node(main_node, main_node->address, node);
             yadl_thread_remove(main_node->address);
+            delete_node(main_node, main_node->address, node);
         } else {
 #if __linux__
             pthread_attr_t pthread_attr;
@@ -159,8 +159,8 @@ void scan_node(gc_node_t *main_node, gc_node_t *sub_node, bool node) {
                 if (i != NULL && *(void **) i != NULL && address_node != NULL) {
                     if (*(void **) i == address_node->address)
                         address_node->mark = true;
+                    }
                 }
-            }
 #else
             void *pthread_stack = pthread_get_stackaddr_np(
                     *((yadl_pthread_context_t *) main_node->address)->pthread);
@@ -174,8 +174,8 @@ void scan_node(gc_node_t *main_node, gc_node_t *sub_node, bool node) {
                     if (*(void **) i == address_node->address)
                         address_node->mark = true;
                 }
-            }
 #endif
+            }
         }
     } else {
         if (main_node->address != NULL) {
@@ -193,7 +193,8 @@ void scan_node(gc_node_t *main_node, gc_node_t *sub_node, bool node) {
     pthread_mutex_unlock(&node_mutex);
 }
 
-void free_node(gc_node_t *node) { // currently, not used.
+void free_node(gc_node_t *node) {
+    pthread_mutex_lock(&node_mutex);
     if (node->left != NULL)
         free_node(node->left);
 
@@ -201,4 +202,5 @@ void free_node(gc_node_t *node) { // currently, not used.
         free_node(node->right);
 
     free(node);
+    pthread_mutex_unlock(&node_mutex);
 }

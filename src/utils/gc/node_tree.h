@@ -33,13 +33,13 @@ typedef struct gc_node {
     struct gc_node *left, *right, *parent;
 } gc_node_t;
 
-gc_node_t *insert_node(gc_node_t *gc_node, void *address, bool node);
+gc_node_t *insert_node(gc_node_t *gc_node, void *address);
 
-u_int8_t delete_node(gc_node_t *gc_node, void *address, bool node);
+u_int8_t delete_node(gc_node_t *gc_node, void *address, int8_t node);
 
-gc_node_t *search_node(gc_node_t *gc_node, void *address, bool node);
+gc_node_t *search_node(gc_node_t *gc_node, void *address, int8_t node);
 
-void scan_node(gc_node_t *main_node, gc_node_t *sub_node, bool node);
+void scan_node(gc_node_t *main_node, gc_node_t *sub_node, int8_t node);
 
 void free_node(gc_node_t *node);
 
