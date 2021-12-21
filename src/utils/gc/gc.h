@@ -21,6 +21,7 @@
 #ifndef YADL_GC_H
 #define YADL_GC_H
 
+#define YADL_NON_GC_NODE 0xFFFFFFFF
 #define YADL_GC_NODE_ADDRESS 0x0
 #define YADL_GC_NODE_PTHREAD 0x1
 
@@ -38,6 +39,7 @@ static struct yadl_gc_context {
     gc_node_t *address_node;
     gc_node_t *pthread_node;
 
+    gc_node_t *non_gc_node;
     yadl_pthread_context_t *pthread_context;
 } yadl_gc_context_t;
 
@@ -45,9 +47,9 @@ void yadl_gc_init();
 
 void yadl_gc_set_alive(bool alive);
 
-void* yadl_gc_get_context_value(int8_t value);
+void* yadl_gc_get_context(int8_t value);
 
-void yadl_gc_append(void *address, bool node);
+void yadl_gc_append(void *address, int8_t node);
 
 void *yadl_gc_loop();
 

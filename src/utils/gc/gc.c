@@ -21,40 +21,45 @@
 #include "gc.h"
 
 void yadl_gc_init() {
-    yadl_gc_context_t.pthread_context = malloc(sizeof(yadl_pthread_context_t));
-    yadl_gc_context_t.pthread_context->pthread_mutex = malloc(sizeof(pthread_mutex_t));
+    yadl_gc_context_t.non_gc_node = insert_node(NULL, yadl_malloc(sizeof(void *), true));
+    yadl_gc_context_t.pthread_context = yadl_malloc(sizeof(yadl_pthread_context_t), true);
+    yadl_gc_context_t.pthread_context->pthread_mutex = yadl_malloc(sizeof(pthread_mutex_t), true);
 
-    pthread_mutexattr_t *mutex_attr = malloc(sizeof(pthread_mutexattr_t));
+    pthread_mutexattr_t *mutex_attr = yadl_malloc(sizeof(pthread_mutexattr_t), true);
     pthread_mutexattr_init(mutex_attr);
     pthread_mutexattr_settype(mutex_attr, PTHREAD_MUTEX_RECURSIVE);
     pthread_mutex_init(yadl_gc_context_t.pthread_context->pthread_mutex, mutex_attr);
 
     yadl_gc_set_alive(true);
     yadl_gc_context_t.address_node = insert_node(NULL,
-                                                 malloc(sizeof(void *)),
-                                                 YADL_GC_NODE_ADDRESS);
+                                                 yadl_malloc(sizeof(void *), true));
     yadl_gc_context_t.address_node->mark = -1; // Do not allow garbage collectors to remove root nodes.
 
-    yadl_gc_context_t.pthread_node = insert_node(NULL,yadl_pthread_create(yadl_gc_loop, NULL), YADL_GC_NODE_PTHREAD);
+    yadl_gc_context_t.pthread_node = insert_node(NULL,yadl_pthread_create(yadl_gc_loop, NULL, NULL));
 }
 
-void *yadl_gc_get_context_value(int8_t value) {
-    if (value == YADL_GC_NODE_ADDRESS)
-        return yadl_gc_context_t.address_node;
-    else if (value == YADL_GC_NODE_PTHREAD)
-        return yadl_gc_context_t.pthread_node;
-    else
-        return NULL;
+void *yadl_gc_get_context(int8_t value) {
+    switch (value) {
+        case YADL_NON_GC_NODE:
+            return yadl_gc_context_t.non_gc_node;
+        case YADL_GC_NODE_ADDRESS:
+            return yadl_gc_context_t.address_node;
+        case YADL_GC_NODE_PTHREAD:
+            return yadl_gc_context_t.pthread_node;
+        default:
+            return NULL;
+    }
 }
 
 void yadl_gc_set_alive(bool alive) {
     yadl_gc_context_t.gc_alive = alive;
 }
 
-void yadl_gc_append(void *address, bool node) {
-    void *selected_node = (node == YADL_GC_NODE_PTHREAD ? yadl_gc_context_t.pthread_node : yadl_gc_context_t.address_node);
+void yadl_gc_append(void *address, int8_t node) {
+    void *selected_node = yadl_gc_get_context(node);
+    if(node == YADL_GC_NODE_PTHREAD)
     if (search_node(selected_node, address, node) == NULL) {
-        insert_node(selected_node, address, node);
+        insert_node(selected_node, address);
     }
 }
 
