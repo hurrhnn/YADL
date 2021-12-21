@@ -39,6 +39,7 @@ struct main_client_object {
     pthread_cond_t *main_client_cond, *main_heartbeat_cond;
     pthread_mutex_t *main_client_mutex, *main_heartbeat_mutex;
 
+    bool invalid_session;
     int64_t *heartbeat_interval;
     user_t *self_user;
     char *test;

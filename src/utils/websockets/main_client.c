@@ -67,17 +67,18 @@ void connection_retry(struct lws *client_wsi, lws_sorted_usec_list_t *sul, sul_c
     }
 }
 
-void init_main_client_object(struct main_client_payload *main_client_payload) {
+void main_client_object_init(struct main_client_payload *main_client_payload) {
     if (main_client_payload->client_object == NULL) {
-        main_client_payload->client_object = malloc(sizeof(struct main_client_object));
-        *main_client_payload->client_object = (struct main_client_object) {malloc(sizeof(size_t)),
-                                                                           malloc(sizeof(size_t)), NULL,
-                                                                           malloc(sizeof(pthread_cond_t)), NULL,
-                                                                           malloc(sizeof(pthread_mutex_t)), NULL,
-                                                                           malloc(sizeof(int64_t)),
-                                                                           malloc(sizeof(self_user_t)),
+        main_client_payload->client_object = yadl_malloc(sizeof(struct main_client_object), true);
+        *main_client_payload->client_object = (struct main_client_object) {yadl_malloc(sizeof(size_t), true),
+                                                                           yadl_malloc(sizeof(size_t), true), NULL,
+                                                                           yadl_malloc(sizeof(pthread_cond_t), true), NULL,
+                                                                           yadl_malloc(sizeof(pthread_mutex_t), true), NULL,
                                                                            NULL,
-                                                                           malloc(YADL_MAIN_SESSION_ID_LENGTH)};
+                                                                           yadl_malloc(sizeof(int64_t), true),
+                                                                           yadl_malloc(sizeof(self_user_t), true),
+                                                                           NULL,
+                                                                           yadl_malloc(YADL_MAIN_SESSION_ID_LENGTH, true)};
 
         pthread_cond_init(main_client_payload->client_object->main_client_cond, NULL);
         pthread_mutex_init(main_client_payload->client_object->main_client_mutex, NULL);
@@ -97,14 +98,13 @@ void main_client_wait_signal(pthread_mutex_t *pthread_mutex, pthread_cond_t *pth
 }
 
 void *main_send_heartbeat(void *ws_payload) {
-    yadl_pthread_append(pthread_self());
     struct main_client_payload *p_ws_payload = ws_payload;
     struct timeval tv;
     struct timespec ts;
-    while (p_ws_payload->client_wsi) {
+    while (!p_ws_payload->connection_exhausted) {
         JSON_Object *root_object = yadl_json_object_builder(NULL);
         json_object_dotset_number(root_object, "op", 1);
-        json_object_dotset_number(root_object, "d", (double) *p_ws_payload->client_object->heartbeat++);
+        json_object_dotset_number(root_object, "d", (double) (*p_ws_payload->client_object->heartbeat += 1));
 
         yadl_json_lws_write(p_ws_payload->client_wsi, root_object);
 
@@ -121,7 +121,7 @@ void *main_send_heartbeat(void *ws_payload) {
 }
 
 int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
-                            void *user, void *in, size_t len) {
+                            __attribute__((unused)) void *user, void *in, size_t len) {
     yadl_pthread_append(pthread_self());
     struct main_client_payload *ws_payload = lws_context_user(lws_get_context((wsi)));
     ws_payload->client_wsi = wsi;
@@ -129,15 +129,16 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 
     switch (reason) {
         case LWS_CALLBACK_WSI_CREATE: {
-            init_main_client_object(ws_payload);
+            main_client_object_init(ws_payload);
             break;
         }
 
-        case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
+        case LWS_CALLBACK_CLIENT_CONNECTION_ERROR: {
             lwsl_err("CLIENT_CONNECTION_ERROR: %s\n",
                      in ? (char *) in : "(null)");
             connection_retry(wsi, &ws_payload->sul, schedule_callback, &ws_payload->retry_count);
             break;
+        }
 
         case LWS_CALLBACK_CLIENT_RECEIVE: {
 //            lwsl_hexdump_level(LLL_USER, in, len);
@@ -155,7 +156,7 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
             u_int8_t op_code = (u_int8_t) json_object_dotget_number(root_object, "op");
             JSON_Object *data_object = json_object_dotget_object(root_object, "d");
 
-            if (ws_payload->client_object->test != NULL && strstr(raw, "778603028957495296") == NULL) {
+            if (ws_payload->client_object->test != NULL && strstr(raw, ws_payload->client_object->self_user->id) == NULL) {
                 char *create_message_api = yadl_malloc(YADL_MIDIUM_SIZE),
                         *authorization_header = yadl_malloc(YADL_MIDIUM_SIZE), **payload = yadl_malloc(sizeof(char *));
                 snprintf(create_message_api, YADL_MIDIUM_SIZE,
@@ -165,14 +166,14 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                          yadl_context->info.TOKEN);
 
                 JSON_Object *message_payload = yadl_json_object_builder(NULL);
-                char *butty_raw = yadl_strcat(yadl_strcat("```json\n", raw), "\n```");
+                char *pretty_raw = yadl_strcat(yadl_strcat("```json\n", raw), "\n```");
                 char *content = yadl_malloc(2000);
-                if (strlen(butty_raw) >= 2000) {
-                    memcpy(content, butty_raw, 1991);
+                if (strlen(pretty_raw) >= 2000) {
+                    memcpy(content, pretty_raw, 1991);
                     strcpy(content + 1991, " ...\n```");
                     json_object_dotset_string(message_payload, "content", content);
                 } else
-                    json_object_dotset_string(message_payload, "content", butty_raw);
+                    json_object_dotset_string(message_payload, "content", pretty_raw);
 
                 *payload = json_serialize_to_string(json_object_get_wrapping_value(message_payload));
                 http_request("POST", create_message_api, authorization_header, NULL, yadl_context->info.APPLICATION,
@@ -231,19 +232,34 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                     }
                     break;
                 }
-                case 9:
+                case 9: {
+                    ws_payload->client_object->invalid_session = true;
                     return -1; // Just returns -1 to disconnect.
+                }
                 case 10: {
                     *ws_payload->client_object->heartbeat_interval = (int64_t) json_object_dotget_number(root_object,
                                                                                                          "d.heartbeat_interval");
-                    if (ws_payload->client_object->heartbeat_main != NULL) {
+
+                    if (ws_payload->client_object->heartbeat_main == NULL) {
+                        yadl_pthread_context_t *heartbeat_main_context = yadl_pthread_create(main_send_heartbeat,
+                                                                                             NULL,ws_payload);
+
+                        ws_payload->client_object->heartbeat_main = heartbeat_main_context->pthread;
+                        ws_payload->client_object->main_heartbeat_cond = heartbeat_main_context->pthread_cond;
+                        ws_payload->client_object->main_heartbeat_mutex = heartbeat_main_context->pthread_mutex;
+                        lwsl_user("op %d, Started main heartbeat thread..", op_code);
+
+                        main_client_wait_signal(ws_payload->client_object->main_client_mutex,
+                                                ws_payload->client_object->main_client_cond, NULL);
+                    } else {
                         pthread_cond_signal(ws_payload->client_object->main_heartbeat_cond);
                         lwsl_user("op %d, Sent signal to exist heartbeat thread..", op_code);
 
                         main_client_wait_signal(ws_payload->client_object->main_client_mutex,
                                                 ws_payload->client_object->main_client_cond, NULL);
-                        // wait for sent op 11.
+                    }
 
+                    if(!ws_payload->client_object->invalid_session && strlen(ws_payload->client_object->session_id)) {
                         root_object = yadl_json_object_builder(NULL);
                         json_object_dotset_number(root_object, "op", 6);
                         json_object_dotset_string(root_object, "d.token", yadl_context->info.TOKEN);
@@ -253,18 +269,7 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                         lwsl_user("%s\n", json_serialize_to_string(json_object_get_wrapping_value(root_object)));
                         yadl_json_lws_write(wsi, root_object);
                     } else {
-                        yadl_pthread_context_t *heartbeat_main_context = yadl_pthread_create(main_send_heartbeat,
-                                                                                             ws_payload);
-
-                        ws_payload->client_object->heartbeat_main = heartbeat_main_context->pthread;
-                        ws_payload->client_object->main_heartbeat_cond = heartbeat_main_context->pthread_cond;
-                        ws_payload->client_object->main_heartbeat_mutex = heartbeat_main_context->pthread_mutex;
-                        lwsl_user("op %d, Started main heartbeat thread..", op_code);
-
-                        main_client_wait_signal(ws_payload->client_object->main_client_mutex,
-                                                ws_payload->client_object->main_client_cond, NULL);
-                        // wait for sent op 11.
-
+                        ws_payload->client_object->invalid_session = false;
                         root_object = yadl_json_object_builder(NULL);
                         json_object_dotset_number(root_object, "op", 2);
                         json_object_dotset_string(root_object, "d.token", yadl_context->info.TOKEN);
@@ -276,7 +281,6 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                         json_object_dotset_value(root_object, "d.presence.activities",
                                                  json_parse_string("[{\"name\": \"Testing\", \"type\": 1}]"));
                         json_object_dotset_number(root_object, "d.intents", yadl_context->info.GATEWAY_INTENTS);
-
                         yadl_json_lws_write(wsi, root_object);
                     }
                     break;
@@ -289,6 +293,7 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 
         case LWS_CALLBACK_CLIENT_ESTABLISHED:
             lwsl_user("WS %s%s 101\n", ws_payload->address, ws_payload->path);
+            ws_payload->retry_count = 0;
             break;
 
         case LWS_CALLBACK_WS_PEER_INITIATED_CLOSE: {
@@ -296,7 +301,7 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
             char *close_reason = yadl_malloc(len - 2);
 
             memcpy(&code, in, 0x2);
-            memcpy(close_reason, in + 2, len - 2);
+            memcpy(close_reason, in + 0x2, len - 0x2);
 
             lwsl_err("Server disconnected websocket connection. (%d) - %s", ntohs(code), close_reason);
             switch (ntohs(code)) {
@@ -334,8 +339,9 @@ int start_main_client(yadl_context_t *yadl_context) {
     yadl_pthread_append(pthread_self());
     struct http_result *http_result = http_request("GET", (char *) YADL_RETRIEVE_GATEWAY_URL, NULL, NULL,
                                                    (char *) YADL_USER_AGENT, NULL);
-    if (http_result->response_body == NULL) {
-        lwsl_err("Can't retrieve gateway address.");
+
+    if (!strlen(*http_result->response_body)) {
+        lwsl_err("Can't retrieve discord gateway address. check your internet connection.");
         return EXIT_FAILURE;
     }
 
@@ -378,7 +384,7 @@ int start_main_client(yadl_context_t *yadl_context) {
     main_payload->client_wsi = NULL;
     yadl_gc_set_alive(false);
 
-    pthread_join(*((yadl_pthread_context_t *) ((gc_node_t *) yadl_gc_get_context_value(
+    pthread_join(*((yadl_pthread_context_t *) ((gc_node_t *) yadl_gc_get_context(
             YADL_GC_NODE_PTHREAD))->address)->pthread, NULL);
     return 0;
 }
