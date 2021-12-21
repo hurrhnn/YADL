@@ -26,5 +26,6 @@ int main() {
     yadl_init(&yadl_context);
 
     yadl_launch(&yadl_context);
+    yadl_cleanup();
     return 0;
 }
