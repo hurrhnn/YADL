@@ -42,18 +42,26 @@ char *yadl_strcat(const char *str1, const char *str2) {
     return str;
 }
 
-void *yadl_malloc(size_t length) {
+void *yadl_malloc(size_t length, ...) {
+    int8_t selected_node = YADL_GC_NODE_ADDRESS;
+    va_list ap;
+
+    va_start(ap, length);
+    if(va_arg(ap, size_t) == true)
+        selected_node = (int8_t) YADL_NON_GC_NODE;
+
     void *address = malloc(length);
     memset(address, 0x0, length);
 
-    yadl_gc_append(address, YADL_GC_NODE_ADDRESS);
+    yadl_gc_append(address, selected_node);
+    va_end(ap);
     return address;
 }
 
 void *yadl_realloc(void *address, size_t length) {
     void *new_address = realloc(address, length);
     if (address != new_address) {
-        delete_node(yadl_gc_get_context_value(YADL_GC_NODE_ADDRESS), address,
+        delete_node(yadl_gc_get_context(YADL_GC_NODE_ADDRESS), address,
                     YADL_GC_NODE_ADDRESS); // address is already free'd by realloc().
         yadl_gc_append(new_address, YADL_GC_NODE_ADDRESS);
     }

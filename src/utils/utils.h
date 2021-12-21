@@ -33,7 +33,7 @@ char *yadl_strrem(const char *str, const char *sub);
 
 char *yadl_strcat(const char *str1, const char *str2);
 
-void *yadl_malloc(size_t length);
+void *yadl_malloc(size_t length, ...);
 
 void *yadl_realloc(void *address, size_t length);
 
