@@ -41,6 +41,8 @@ void yadl_init(yadl_context_t *yadl_context) {
     sprintf(yadl_info->API_URL, YADL_API_URL, yadl_info->API_VER);
     sprintf(yadl_info->GATEWAY_PATH, YADL_GATEWAY_PATH, yadl_info->GATEWAY_VER);
     sprintf(yadl_info->VOICE_PATH, YADL_VOICE_PATH, yadl_info->VOICE_VER);
+    sprintf(yadl_info->USER_AGENT, YADL_USER_AGENT);
+    sprintf(yadl_info->APPLICATION, YADL_APPLICATION);
 
     yadl_gc_init();
 }
@@ -48,4 +50,9 @@ void yadl_init(yadl_context_t *yadl_context) {
 void yadl_launch(yadl_context_t *yadl_context) {
     lws_set_log_level(LLL_USER | LLL_ERR, NULL);
     start_main_client(yadl_context);
+}
+
+void yadl_cleanup() {
+    free_node(yadl_gc_get_context(YADL_GC_NODE_ADDRESS));
+    free_node(yadl_gc_get_context((int8_t)YADL_NON_GC_NODE));
 }

@@ -69,4 +69,6 @@ void yadl_init(yadl_context_t *yadl_context);
 
 void yadl_launch(yadl_context_t *yadl_context);
 
+void yadl_cleanup();
+
 #endif
