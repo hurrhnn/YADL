@@ -26,6 +26,8 @@
 #include <stdlib.h>
 
 #include "utils/utils.h"
+#include "impl/linked_list.h"
+#include "impl/callback.h"
 
 #define YADL_DEFAULT_API_VER 9
 #define YADL_DEFAULT_GATEWAY_VER 9
@@ -63,6 +65,8 @@ typedef struct yadl_context_info {
 
 typedef struct yadl_context {
     yadl_context_info_t info;
+    yadl_event_cb_t callbacks;
+    obj_list_t *guilds;
 } yadl_context_t;
 
 void yadl_init(yadl_context_t *yadl_context);

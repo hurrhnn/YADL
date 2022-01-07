@@ -25,13 +25,6 @@
 void yadl_init(yadl_context_t *yadl_context) {
     yadl_context_info_t *yadl_info = &yadl_context->info;
 
-    const char *token_env = getenv("TOKEN");
-    memcpy(yadl_info->TOKEN, token_env, strlen(token_env)); //get token from environment variable.
-    if (token_env == NULL) {
-        lwsl_err("Token not provided. please run `TOKEN=<token> ./YADL`.");
-        exit(EXIT_FAILURE);
-    }
-
     YADL_SET_VALUE_IF_NULL(yadl_info->API_VER, YADL_DEFAULT_API_VER);
     YADL_SET_VALUE_IF_NULL(yadl_info->GATEWAY_VER, YADL_DEFAULT_GATEWAY_VER);
     YADL_SET_VALUE_IF_NULL(yadl_info->VOICE_VER, YADL_DEFAULT_VOICE_VER);
