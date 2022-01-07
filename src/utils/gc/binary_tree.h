@@ -18,8 +18,13 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef YADL_NODE_TREE_H
-#define YADL_NODE_TREE_H
+/*
+ Simple Binary Tree Implementation
+ Copyright (C) 2021 Wonjun Jung (KokoseiJ), Rhnn Hur (hurrhnn)
+*/
+
+#ifndef YADL_BINARY_TREE_H
+#define YADL_BINARY_TREE_H
 
 #include "pthread.h"
 
