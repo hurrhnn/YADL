@@ -30,7 +30,7 @@ find_library(LIBSIGSEGV_STATIC_LIBRARIES NAMES "${prefix}parson${suffix}" HINTS 
 set_target_properties(_libwebsockets PROPERTIES IMPORTED_LOCATION ${LIBWEBSOCKETS_STATIC_LIBRARIES})
 set_target_properties(_parson PROPERTIES IMPORTED_LOCATION ${LIBSIGSEGV_STATIC_LIBRARIES})
 
-add_library(YADL STATIC src/utils/http/http_request.c src/utils/http/http_request.h src/utils/http/http_payload.h src/yadl.h src/utils/http/http_result.h src/utils/utils.c src/utils/utils.h src/utils/websockets/main_client.c src/utils/websockets/main_client.h src/utils/gc/gc.h src/utils/gc/gc.c src/utils/gc/node_tree.c src/utils/gc/node_tree.h src/utils/json/json.c src/utils/json/json.h src/utils/gc/pthread.c src/utils/gc/pthread.h src/impl/user.c src/impl/user.h src/yadl.c src/yadl.h src/api/create_message.c src/api/create_message.h)
+add_library(YADL STATIC src/utils/http/http_request.c src/utils/http/http_request.h src/utils/http/http_payload.h src/yadl.h src/utils/http/http_result.h src/utils/utils.c src/utils/utils.h src/utils/websockets/main_client.c src/utils/websockets/main_client.h src/utils/gc/gc.h src/utils/gc/gc.c src/utils/gc/binary_tree.c src/utils/gc/binary_tree.h src/utils/json/json.c src/utils/json/json.h src/utils/gc/pthread.c src/utils/gc/pthread.h src/impl/user.c src/impl/user.h src/yadl.c src/yadl.h src/api/create_message.c src/api/create_message.h src/impl/callback.c src/impl/callback.h src/impl/guild.c src/impl/guild.h src/impl/linked_list.c src/impl/linked_list.h src/impl/impl.c src/impl/impl.h)
 add_dependencies(YADL _libwebsockets _parson)
 target_include_directories(YADL PUBLIC ${OPENSSL_INCLUDE_DIR})
 target_include_directories(YADL PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/install/include)
