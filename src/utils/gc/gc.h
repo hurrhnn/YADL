@@ -26,7 +26,7 @@
 #define YADL_GC_NODE_PTHREAD 0x1
 
 #include "pthread.h"
-#include "node_tree.h"
+#include "binary_tree.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
