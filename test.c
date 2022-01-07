@@ -18,13 +18,38 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <stdio.h>
 #include "src/yadl.h"
+
+void on_ready(const struct yadl_event_on_ready *event, void* user_data) {
+    puts("YADL v0.0.2 Library Test Started.\n");
+    puts("===== On Ready =====");
+    printf("ID: %s\n", event->self_user->id);
+    printf("Name: %s#%s\n", event->self_user->username, event->self_user->discriminator);
+    puts("");
+}
+
+void on_guild_create(const struct yadl_event_on_guild_create *event, void *user_data) {
+    printf("Guild Created: %s\n", event->guild->name);
+}
 
 int main() {
     yadl_context_t yadl_context;
     memset(&yadl_context, 0x0, sizeof(yadl_context_t));
-    yadl_init(&yadl_context);
 
+    const char *token_env = getenv("TOKEN"); // get token from environment variable.
+    if (token_env == NULL) {
+        lwsl_err("Token not provided. please run `TOKEN=<token> ./YADL`.");
+        exit(EXIT_FAILURE);
+    }
+    memcpy(yadl_context.info.TOKEN, token_env, strlen(token_env));
+
+    yadl_context.info.GATEWAY_INTENTS = 32767;
+    yadl_context.callbacks.on_ready = on_ready;
+    yadl_context.callbacks.on_guild_create = on_guild_create;
+    yadl_context.callbacks.user_data = NULL;
+
+    yadl_init(&yadl_context);
     yadl_launch(&yadl_context);
     yadl_cleanup();
     return 0;
