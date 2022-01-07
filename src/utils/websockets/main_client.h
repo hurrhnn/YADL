@@ -41,7 +41,7 @@ struct main_client_object {
 
     bool invalid_session;
     int64_t *heartbeat_interval;
-    user_t *self_user;
+    self_user_t *self_user;
     char *test;
     char *session_id;
 };
