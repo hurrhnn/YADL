@@ -147,7 +147,7 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                 break;
 
             JSON_Object *root_object = yadl_json_object_builder(raw);
-            printf("%s\n", raw);
+//            printf("%s\n", raw);
 
             const char *type = json_object_dotget_string(root_object, "t");
             *ws_payload->client_object->sequence = (size_t) (json_object_dotget_number(root_object, "s") == 0
@@ -181,12 +181,26 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
             }
 
             switch (op_code) {
+
                 case 0: {
+                    void *user_data = ws_payload->yadl_context->callbacks.user_data;
                     if (!strcmp(type, "READY")) {
                         ws_payload->client_object->self_user = parse_user(json_object_dotget_value(data_object, "user"));
                         memcpy(ws_payload->client_object->session_id, json_object_dotget_string(data_object, "session_id"), YADL_MAIN_SESSION_ID_LENGTH);
+
+                        struct yadl_event_on_ready *on_ready = yadl_malloc(sizeof(struct yadl_event_on_ready));
+                        on_ready->self_user = ws_payload->client_object->self_user;
+                        ws_payload->yadl_context->callbacks.on_ready(on_ready, user_data);
                     }
-                    if (!strcmp(type, "MESSAGE_CREATE")) {
+                    else if (!strcmp(type, "GUILD_CREATE")) {
+                        guild_t *guild = parse_guild(json_object_get_wrapping_value(data_object));
+                        put_list(ws_payload->yadl_context->guilds, guild->id, guild);
+
+                        struct yadl_event_on_guild_create *on_guild_create = yadl_malloc(sizeof(struct yadl_event_on_guild_create));
+                        on_guild_create->guild = guild;
+                        ws_payload->yadl_context->callbacks.on_guild_create(on_guild_create, user_data);
+                    }
+                    else if (!strcmp(type, "MESSAGE_CREATE")) {
                         // Below is the test code.
                         if (!strcmp(json_object_dotget_string(data_object, "content"), "!!install") && !strcmp(
                                 json_object_dotget_string(data_object, "author.id"), "345473282654470146")) {
