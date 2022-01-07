@@ -24,7 +24,7 @@
  Copyright (C) 2021 Wonjun Jung (KokoseiJ), Rhnn Hur (hurrhnn)
 */
 
-#include "node_tree.h"
+#include "binary_tree.h"
 #include "gc.h"
 
 #if __linux__
