@@ -65,6 +65,8 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# Custom Directories
 .idea/
 submodules/
 build/
+cmake-build-build-coverage/
