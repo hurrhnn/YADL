@@ -19,7 +19,6 @@
 */
 
 #include "utils.h"
-#include "gc/gc.h"
 
 char *yadl_strrem(const char *str, const char *sub) {
     char *copy_str = yadl_malloc(strlen(str));

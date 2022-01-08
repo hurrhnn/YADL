@@ -24,6 +24,8 @@
 #include <parson.h>
 #include <libwebsockets.h>
 
+#include "../utils.h"
+
 JSON_Object *yadl_json_object_builder(const char *raw);
 
 JSON_Array *yadl_json_array_builder();

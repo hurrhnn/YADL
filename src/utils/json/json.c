@@ -19,7 +19,6 @@
 */
 
 #include "json.h"
-#include "../utils.h"
 
 JSON_Object *yadl_json_object_builder(const char *raw) {
     return raw == NULL ? json_value_get_object(json_value_init_object()) : json_object(json_parse_string(raw));

@@ -30,7 +30,8 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "../utils.h"
+#include "gc.h"
+#include "binary_tree.h"
 
 typedef struct yadl_pthread_context {
     pthread_t *pthread;

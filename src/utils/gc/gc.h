@@ -25,14 +25,17 @@
 #define YADL_GC_NODE_ADDRESS 0x0
 #define YADL_GC_NODE_PTHREAD 0x1
 
-#include "pthread.h"
-#include "binary_tree.h"
-
 #include <stdbool.h>
 #include <stdlib.h>
 #include <strings.h>
 #include <unistd.h>
 #include <parson.h>
+
+#include "binary_tree.h"
+#include "pthread.h"
+
+typedef struct gc_node gc_node_t;
+typedef struct yadl_pthread_context yadl_pthread_context_t;
 
 static struct yadl_gc_context {
     bool gc_alive;

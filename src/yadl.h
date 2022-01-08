@@ -26,13 +26,16 @@
 #include <stdlib.h>
 
 #include "utils/utils.h"
-#include "impl/linked_list.h"
-#include "impl/callback.h"
+#include "impl/impl.h"
+
+#define YADL_MAJOR_VERSION "0"
+#define YADL_MINOR_VERSION "0"
+#define YADL_REVISION "3"
+#define YADL_VERSION (YADL_MAJOR_VERSION "." YADL_MINOR_VERSION "." YADL_REVISION)
 
 #define YADL_DEFAULT_API_VER 9
 #define YADL_DEFAULT_GATEWAY_VER 9
 #define YADL_DEFAULT_VOICE_VER 4
-#define YADL_DEFAULT_GATEWAY_INTENTS 32509
 
 #define YADL_APPLICATION "YADL"
 #define YADL_USER_AGENT "Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0"
@@ -40,7 +43,9 @@
 
 #define YADL_RETRIEVE_GATEWAY_URL "https://discord.com/api/gateway"
 #define YADL_API_URL "https://discord.com/api/v%d"
+
 #define YADL_CDN_URL "https://cdn.discordapp.com"
+#define YADL_USER_AVATAR "/avatars/%s/%s.png"
 
 #define YADL_GATEWAY_PATH "/?v=%d&encoding=json"
 #define YADL_VOICE_PATH "/?v=%d"

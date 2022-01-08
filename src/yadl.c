@@ -19,7 +19,6 @@
 */
 
 #include "yadl.h"
-#include "utils/gc/gc.h"
 #include "utils/websockets/main_client.h"
 
 void yadl_init(yadl_context_t *yadl_context) {
@@ -28,7 +27,7 @@ void yadl_init(yadl_context_t *yadl_context) {
     YADL_SET_VALUE_IF_NULL(yadl_info->API_VER, YADL_DEFAULT_API_VER);
     YADL_SET_VALUE_IF_NULL(yadl_info->GATEWAY_VER, YADL_DEFAULT_GATEWAY_VER);
     YADL_SET_VALUE_IF_NULL(yadl_info->VOICE_VER, YADL_DEFAULT_VOICE_VER);
-    YADL_SET_VALUE_IF_NULL(yadl_info->GATEWAY_INTENTS, YADL_DEFAULT_GATEWAY_INTENTS);
+    YADL_SET_VALUE_IF_NULL(yadl_info->GATEWAY_INTENTS, YADL_GATEWAY_INTENTS_DEFAULT);
 
     sprintf(yadl_info->AUTHORIZATION_HEADER, YADL_AUTHORIZATION_HEADER, yadl_info->TOKEN);
     sprintf(yadl_info->API_URL, YADL_API_URL, yadl_info->API_VER);

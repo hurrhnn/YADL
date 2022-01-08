@@ -26,11 +26,11 @@
 #ifndef YADL_BINARY_TREE_H
 #define YADL_BINARY_TREE_H
 
-#include "pthread.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+
+#include "../utils.h"
 
 typedef struct gc_node {
     void *address;

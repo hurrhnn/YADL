@@ -25,7 +25,6 @@
 */
 
 #include "binary_tree.h"
-#include "gc.h"
 
 #if __linux__
 pthread_mutex_t node_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;

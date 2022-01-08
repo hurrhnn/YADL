@@ -21,7 +21,7 @@
 #include <libwebsockets.h>
 #include <stdbool.h>
 
-#include "../../impl/user.h"
+#include "../../impl/impl.h"
 #include "../../yadl.h"
 
 #ifndef YADL_MAIN_CLIENT_H

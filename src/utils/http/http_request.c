@@ -19,7 +19,6 @@
 */
 
 #include "http_request.h"
-#include "../gc/pthread.h"
 
 const lws_retry_bo_t http_retry = {
         .secs_since_valid_ping = 3,

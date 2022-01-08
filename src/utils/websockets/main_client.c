@@ -19,10 +19,6 @@
 */
 
 #include "main_client.h"
-#include "../gc/pthread.h"
-#include "../json/json.h"
-#include "../http/http_request.h"
-#include "../gc/gc.h"
 
 static const u_int32_t backoff_ms[] = {1000, 2000, 3000, 4000, 5000 };
 
@@ -181,7 +177,6 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
             }
 
             switch (op_code) {
-
                 case 0: {
                     void *user_data = ws_payload->yadl_context->callbacks.user_data;
                     if (!strcmp(type, "READY")) {
@@ -189,7 +184,16 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                         memcpy(ws_payload->client_object->session_id, json_object_dotget_string(data_object, "session_id"), YADL_MAIN_SESSION_ID_LENGTH);
 
                         struct yadl_event_on_ready *on_ready = yadl_malloc(sizeof(struct yadl_event_on_ready));
+                        JSON_Array *unavailable_guilds = json_object_dotget_array(data_object, "guilds");
+
+                        on_ready->gateway_version = (int8_t) json_object_dotget_number(data_object, "v");
                         on_ready->self_user = ws_payload->client_object->self_user;
+                        on_ready->unavailable_guild_count = json_array_get_count(unavailable_guilds);
+
+                        for(int i = 0; i < on_ready->unavailable_guild_count; i++) {
+                            guild_t *unavailable_guild = parse_guild(json_array_get_value(unavailable_guilds, i));
+                            put_list(ws_payload->yadl_context->guilds, unavailable_guild->id, unavailable_guild);
+                        }
                         ws_payload->yadl_context->callbacks.on_ready(on_ready, user_data);
                     }
                     else if (!strcmp(type, "GUILD_CREATE")) {

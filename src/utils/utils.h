@@ -25,6 +25,14 @@
 #include <strings.h>
 #include <libwebsockets.h>
 
+#include "gc/pthread.h"
+#include "gc/binary_tree.h"
+#include "gc/gc.h"
+#include "http/http_request.h"
+#include "http/http_result.h"
+#include "http/http_payload.h"
+#include "json/json.h"
+
 #define YADL_SMALL_SIZE  0x10
 #define YADL_MIDIUM_SIZE 0x100
 #define YADL_LARGE_SIZE  0x1000

@@ -19,11 +19,12 @@
 */
 
 #include "user.h"
-#include "../utils/utils.h"
+#include "../yadl.h"
 
 user_t *parse_user(JSON_Value *user_value) {
     JSON_Object *user = json_object(user_value);
     user_t *result = yadl_malloc(sizeof(user_t));
+
     *result = (user_t) {json_object_get_boolean(user, "verified"),
                         (char *) json_object_get_string(user, "username"),
                         json_object_get_boolean(user, "mfa_enabled"),
@@ -35,5 +36,9 @@ user_t *parse_user(JSON_Value *user_value) {
                         json_object_get_boolean(user, "bot"),
                         (char *) json_object_get_string(user, "avatar"),
     };
+    char *avatar = yadl_malloc(YADL_MIDIUM_SIZE);
+    sprintf(avatar, yadl_strcat(YADL_CDN_URL, YADL_USER_AVATAR), result->id, result->avatar);
+    result->avatar = avatar;
+
     return result;
 }
