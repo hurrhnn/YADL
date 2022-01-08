@@ -28,6 +28,7 @@
 struct yadl_event_on_ready {
     int8_t gateway_version;
     self_user_t *self_user;
+    u_int16_t unavailable_guild_count;
 };
 
 typedef void (*yadl_event_on_ready_t)(const struct yadl_event_on_ready *event, void *user_data);
@@ -43,7 +44,5 @@ typedef struct yadl_event_cb {
     yadl_event_on_guild_create_t on_guild_create;
     void *user_data;
 } yadl_event_cb_t;
-
-void yadl_event_cb_register(yadl_event_cb_t event_cb, void *user_data);
 
 #endif //YADL_CALLBACK_H
