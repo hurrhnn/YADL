@@ -22,8 +22,8 @@
 #define YADL_CALLBACK_H
 
 #include <stdint.h>
-#include "user.h"
-#include "guild.h"
+#include "../impl/user.h"
+#include "../impl/guild.h"
 
 typedef struct yadl_context yadl_context_t;
 
