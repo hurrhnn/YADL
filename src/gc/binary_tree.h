@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "../utils.h"
+#include "../utils/utils.h"
 
 typedef struct gc_node {
     void *address;
