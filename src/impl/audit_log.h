@@ -21,6 +21,7 @@
 #ifndef YADL_AUDIT_LOG_H
 #define YADL_AUDIT_LOG_H
 
+#include <stdbool.h>
 #include "parson.h"
 #include "../utils/utils.h"
 
