@@ -18,14 +18,14 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef YADL_HTTP_REQUEST_H
-#define YADL_HTTP_REQUEST_H
+#ifndef YADL_HTTP_RESULT_H
+#define YADL_HTTP_RESULT_H
 
-#include "http_payload.h"
-#include "http_result.h"
-#include "../utils.h"
+#include "libwebsockets.h"
 
-struct http_result *
-http_request(const char *method, const char *URL, char *header, char *cookie, const char *user_agent, char **request_body);
+struct http_result {
+    u_int32_t response_code;
+    char **response_body;
+};
 
-#endif
+#endif //YADL_HTTP_RESULT_H
