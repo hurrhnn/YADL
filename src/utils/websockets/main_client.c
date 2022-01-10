@@ -143,7 +143,7 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                 break;
 
             JSON_Object *root_object = yadl_json_object_builder(raw);
-            printf("%s\n", raw);
+//            printf("%s\n", raw);
 
             const char *type = json_object_dotget_string(root_object, "t");
             *ws_payload->client_object->sequence = (size_t) (json_object_dotget_number(root_object, "s") == 0
