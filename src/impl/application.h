@@ -23,7 +23,6 @@
 
 #include <stdbool.h>
 #include "parson.h"
-#include "impl.h"
 #include "../utils/utils.h"
 
 typedef struct yadl_application {

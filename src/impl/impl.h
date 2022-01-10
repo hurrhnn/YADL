@@ -22,6 +22,20 @@
 #include "guild.h"
 #include "linked_list.h"
 #include "user.h"
+#include "application.h"
+#include "audit_log.h"
+#include "embed.h"
+#include "channel.h"
+#include "message.h"
+#include "reaction.h"
+#include "thread.h"
+#include "attachment.h"
+#include "emoji.h"
+#include "integration.h"
+#include "sticker.h"
+#include "invite.h"
+#include "voice.h"
+#include "webhook.h"
 
 #ifndef YADL_IMPL_H
 #define YADL_IMPL_H

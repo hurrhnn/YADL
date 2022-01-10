@@ -143,7 +143,7 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                 break;
 
             JSON_Object *root_object = yadl_json_object_builder(raw);
-//            printf("%s\n", raw);
+            printf("%s\n", raw);
 
             const char *type = json_object_dotget_string(root_object, "t");
             *ws_payload->client_object->sequence = (size_t) (json_object_dotget_number(root_object, "s") == 0
@@ -194,6 +194,7 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                             guild_t *unavailable_guild = parse_guild(json_array_get_value(unavailable_guilds, i));
                             put_list(ws_payload->yadl_context->guilds, unavailable_guild->id, unavailable_guild);
                         }
+                        on_ready->context = ws_payload->yadl_context;
                         ws_payload->yadl_context->callbacks.on_ready(on_ready, user_data);
                     }
                     else if (!strcmp(type, "GUILD_CREATE")) {
@@ -202,9 +203,11 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 
                         struct yadl_event_on_guild_create *on_guild_create = yadl_malloc(sizeof(struct yadl_event_on_guild_create));
                         on_guild_create->guild = guild;
+                        on_guild_create->context = ws_payload->yadl_context;
                         ws_payload->yadl_context->callbacks.on_guild_create(on_guild_create, user_data);
                     }
                     else if (!strcmp(type, "MESSAGE_CREATE")) {
+//                        printf("%s\n", raw);
                         // Below is the test code.
                         if (!strcmp(json_object_dotget_string(data_object, "content"), "!!install") && !strcmp(
                                 json_object_dotget_string(data_object, "author.id"), "345473282654470146")) {
@@ -291,11 +294,11 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                         root_object = yadl_json_object_builder(NULL);
                         json_object_dotset_number(root_object, "op", 2);
                         json_object_dotset_string(root_object, "d.token", yadl_context->info.TOKEN);
-                        json_object_dotset_string(root_object, "d.properties.$os", "Linux");
-                        json_object_dotset_string(root_object, "d.properties.$browser", yadl_context->info.USER_AGENT);
+                        json_object_dotset_string(root_object, "d.properties.$os", YADL_CLIENT_OS);
+                        json_object_dotset_string(root_object, "d.properties.$browser", yadl_context->info.APPLICATION);
                         json_object_dotset_string(root_object, "d.properties.$device", yadl_context->info.APPLICATION);
-                        json_object_dotset_string(root_object, "d.status", "dnd");
-                        json_object_dotset_boolean(root_object, "d.afk", false);
+                        json_object_dotset_string(root_object, "d.presence.status", "idle");
+                        json_object_dotset_boolean(root_object, "d.presence.afk", false);
                         json_object_dotset_value(root_object, "d.presence.activities",
                                                  json_parse_string("[{\"name\": \"Testing\", \"type\": 1}]"));
                         json_object_dotset_number(root_object, "d.intents", yadl_context->info.GATEWAY_INTENTS);
