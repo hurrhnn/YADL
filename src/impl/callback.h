@@ -25,7 +25,10 @@
 #include "user.h"
 #include "guild.h"
 
+typedef struct yadl_context yadl_context_t;
+
 struct yadl_event_on_ready {
+    yadl_context_t *context;
     int8_t gateway_version;
     self_user_t *self_user;
     u_int16_t unavailable_guild_count;
@@ -34,6 +37,7 @@ struct yadl_event_on_ready {
 typedef void (*yadl_event_on_ready_t)(const struct yadl_event_on_ready *event, void *user_data);
 
 struct yadl_event_on_guild_create {
+    yadl_context_t *context;
     guild_t *guild;
 };
 
