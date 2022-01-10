@@ -22,10 +22,13 @@
 #include "src/yadl.h"
 
 void on_ready(const struct yadl_event_on_ready *event, void* user_data) {
-    puts("YADL v0.0.2 Library Test Started.\n");
+    printf("YADL v%s Library Test Started.\n\n", YADL_VERSION);
+
     puts("===== On Ready =====");
+    printf("Gateway Version: %d\n", event->gateway_version);
     printf("ID: %s\n", event->self_user->id);
     printf("Name: %s#%s\n", event->self_user->username, event->self_user->discriminator);
+    printf("Guild Count: %d\n", event->unavailable_guild_count);
     puts("");
 }
 
@@ -33,18 +36,22 @@ void on_guild_create(const struct yadl_event_on_guild_create *event, void *user_
     printf("Guild Created: %s\n", event->guild->name);
 }
 
-int main() {
+int main(__attribute__((unused)) int argc, char **argv) {
     yadl_context_t yadl_context;
     memset(&yadl_context, 0x0, sizeof(yadl_context_t));
 
     const char *token_env = getenv("TOKEN"); // get token from environment variable.
     if (token_env == NULL) {
-        lwsl_err("Token not provided. please run `TOKEN=<token> ./YADL`.");
+        lwsl_err("Token not provided. please run `TOKEN=<token> %s`.", argv[0]);
         exit(EXIT_FAILURE);
     }
     memcpy(yadl_context.info.TOKEN, token_env, strlen(token_env));
 
-    yadl_context.info.GATEWAY_INTENTS = 32767;
+    yadl_gateway_intents gateway_intents = { .value = YADL_GATEWAY_INTENTS_ALL };
+    gateway_intents.flags.GUILD_MEMBERS = false;
+    gateway_intents.flags.GUILD_PRESENCES = false;
+
+    yadl_context.info.GATEWAY_INTENTS = gateway_intents.value;
     yadl_context.callbacks.on_ready = on_ready;
     yadl_context.callbacks.on_guild_create = on_guild_create;
     yadl_context.callbacks.user_data = NULL;
