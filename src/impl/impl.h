@@ -26,26 +26,88 @@
 #ifndef YADL_IMPL_H
 #define YADL_IMPL_H
 
+
+#define YADL_OBJECT_APPLICATION 0
+#define YADL_OBJECT_AUDIT_LOG 1
+#define YADL_OBJECT_AUDIT_LOG_ENTRY 2
+#define YADL_OBJECT_AUDIT_LOG_CHANGE 3
+#define YADL_OBJECT_CHANNEL 4
+#define YADL_OBJECT_MESSAGE 5
+#define YADL_OBJECT_MESSAGE_ACTIVITY 6
+#define YADL_OBJECT_MESSAGE_REFERENCE 7
+#define YADL_OBJECT_FOLLOWED_CHANNEL 8
+#define YADL_OBJECT_REACTION 9
+#define YADL_OBJECT_OVERWRITE 10
+#define YADL_OBJECT_THREAD_METADATA 11
+#define YADL_OBJECT_THREAD_MEMBER 12
+#define YADL_OBJECT_EMBED 13
+#define YADL_OBJECT_EMBED_THUMBNAIL 14
+#define YADL_OBJECT_EMBED_VIDEO 15
+#define YADL_OBJECT_EMBED_IMAGE 16
+#define YADL_OBJECT_EMBED_PROVIDER 17
+#define YADL_OBJECT_EMBED_AUTHOR 18
+#define YADL_OBJECT_EMBED_FOOTER 19
+#define YADL_OBJECT_EMBED_FIELD 20
+#define YADL_OBJECT_ATTACHMENT 21
+#define YADL_OBJECT_CHANNEL_MENTION 22
+#define YADL_OBJECT_ALLOWED_MENTIONS 23
+#define YADL_OBJECT_EMOJI 24
+#define YADL_OBJECT_GUILD 25
+#define YADL_OBJECT_GUILD_PREVIEW 26
+#define YADL_OBJECT_GUILD_WIDGET 27
+#define YADL_OBJECT_GUILD_MEMBER 28
+#define YADL_OBJECT_INTEGRATION 29
+#define YADL_OBJECT_INTEGRATION_ACCOUNT 30
+#define YADL_OBJECT_INTEGRATION_APPLICATION 31
+#define YADL_OBJECT_BAN 32
+#define YADL_OBJECT_WELCOME_SCREEN 33
+#define YADL_OBJECT_WELCOME_SCREEN_CHANNEL 34
+#define YADL_OBJECT_GUILD_SCHEDULED_EVENT 35
+#define YADL_OBJECT_GUILD_SCHEDULED_EVENT_USER 36
+#define YADL_OBJECT_GUILD_TEMPLATE 37
+#define YADL_OBJECT_INVITE 38
+#define YADL_OBJECT_INVITE_METADATA 39
+#define YADL_OBJECT_INVITE_STAGE_INSTANCE 40
+#define YADL_OBJECT_STAGE_INSTANCE 41
+#define YADL_OBJECT_STICKER 42
+#define YADL_OBJECT_STICKER_ITEM 43
+#define YADL_OBJECT_STICKER_PACK 44
+#define YADL_OBJECT_RESPONSE 45
+#define YADL_OBJECT_USER 46
+#define YADL_OBJECT_CONNECTION 47
+#define YADL_OBJECT_VOICE_STATE 48
+#define YADL_OBJECT_VOICE_REGION 49
+#define YADL_OBJECT_WEBHOOK 50
+
+typedef struct {
+    size_t type;
+    char member_size[YADL_MIDIUM_SIZE];
+} yadl_object_metadata_t;
+
+yadl_object_metadata_t *yadl_get_object_metadata(size_t type);
+
+typedef union {
+    struct {
+        u_int8_t GUILDS                    : 1;
+        u_int8_t GUILD_MEMBERS             : 1;
+        u_int8_t GUILD_BANS                : 1;
+        u_int8_t GUILD_EMOJIS_AND_STICKERS : 1;
+        u_int8_t GUILD_INTEGRATIONS        : 1;
+        u_int8_t GUILD_WEBHOOKS            : 1;
+        u_int8_t GUILD_INVITES             : 1;
+        u_int8_t GUILD_VOICE_STATES        : 1;
+        u_int8_t GUILD_PRESENCES           : 1;
+        u_int8_t GUILD_MESSAGES            : 1;
+        u_int8_t GUILD_MESSAGE_REACTIONS   : 1;
+        u_int8_t GUILD_MESSAGE_TYPING      : 1;
+        u_int8_t DIRECT_MESSAGES           : 1;
+        u_int8_t DIRECT_MESSAGE_REACTIONS  : 1;
+        u_int8_t DIRECT_MESSAGE_TYPING     : 1;
+    } flags;
+    u_int16_t value;
+} yadl_gateway_intents;
+
 #define YADL_GATEWAY_INTENTS_DEFAULT 32509
-
-enum YADL_GATEWAY_INTENTS {
-    GUILDS                    = (1 << 0),
-    GUILD_MEMBERS             = (1 << 1),
-    GUILD_BANS                = (1 << 2),
-    GUILD_EMOJIS_AND_STICKERS = (1 << 3),
-    GUILD_INTEGRATIONS        = (1 << 4),
-    GUILD_WEBHOOKS            = (1 << 5),
-    GUILD_INVITES             = (1 << 6),
-    GUILD_VOICE_STATES        = (1 << 7),
-    GUILD_PRESENCES           = (1 << 8),
-    GUILD_MESSAGES            = (1 << 9),
-    GUILD_MESSAGE_REACTIONS   = (1 << 10),
-    GUILD_MESSAGE_TYPING      = (1 << 11),
-    DIRECT_MESSAGES           = (1 << 12),
-    DIRECT_MESSAGE_REACTIONS  = (1 << 13),
-    DIRECT_MESSAGE_TYPING     = (1 << 14)
-} YADL_GATEWAY_INTENTS;
-
 #define YADL_GATEWAY_INTENTS_ALL 32767
 
 #endif //YADL_IMPL_H
