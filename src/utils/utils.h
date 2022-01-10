@@ -37,6 +37,22 @@
 #define YADL_MIDIUM_SIZE 0x100
 #define YADL_LARGE_SIZE  0x1000
 
+#ifdef _WIN32
+    #define YADL_CLIENT_OS    "Windows 32-bit"
+#elif _WIN64
+    #define  YADL_CLIENT_OS "Windows 64-bit"
+#elif __APPLE__ || __MACH__
+    #define    YADL_CLIENT_OS "Mac OS X"
+#elif __linux__
+    #define    YADL_CLIENT_OS "Linux";
+#elif __FreeBSD__
+    #define    YADL_CLIENT_OS "FreeBSD"
+#elif __unix || __unix__
+    #define   YADL_CLIENT_OS "Unix"
+#else
+    #define   YADL_CLIENT_OS "Other"
+#endif
+
 char *yadl_strrem(const char *str, const char *sub);
 
 char *yadl_strcat(const char *str1, const char *str2);
