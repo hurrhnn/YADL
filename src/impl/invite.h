@@ -24,8 +24,9 @@
 #include <stdbool.h>
 #include "parson.h"
 #include "../utils/utils.h"
+#include "../json/json.h"
 
-typedef struct yadl_invite {
+typedef struct __attribute__((__packed__)) {
     char *code;
     char *guild;
     /* partial guild object */
@@ -48,7 +49,7 @@ typedef struct yadl_invite {
 
 } invite_t;
 
-typedef struct yadl_invite_metadata {
+typedef struct __attribute__((__packed__)) {
     int uses;
     int max_uses;
     int max_age;
@@ -57,7 +58,7 @@ typedef struct yadl_invite_metadata {
 
 } invite_metadata_t;
 
-typedef struct yadl_invite_stage_instance {
+typedef struct __attribute__((__packed__)) {
     char *members;
     /* array of partial guild member objects */
     int participant_count;
@@ -66,7 +67,7 @@ typedef struct yadl_invite_stage_instance {
 
 } invite_stage_instance_t;
 
-typedef struct yadl_stage_instance {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *guild_id;
     char *channel_id;

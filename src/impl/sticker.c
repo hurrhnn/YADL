@@ -32,9 +32,9 @@ sticker_t *parse_sticker(JSON_Value *sticker_value) {
                            (char *) json_object_get_string(sticker, "asset"),
                            (int) json_object_get_number(sticker, "type"),
                            (int) json_object_get_number(sticker, "format_type"),
-                           json_object_get_boolean(sticker, "available "),
+                           yadl_json_boolean_null_check(json_object_get_boolean(sticker, "available")),
                            (char *) json_object_get_string(sticker, "guild_id"),
-                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(sticker, "user"))),
+                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(sticker, "user"))),
                            (int) json_object_get_number(sticker, "sort_value")
     };
 
@@ -62,12 +62,12 @@ sticker_pack_t *parse_sticker_pack(JSON_Value *sticker_pack_value) {
     sticker_pack_t *result = yadl_malloc(sizeof(sticker_pack_t), true);
 
     *result = (sticker_pack_t) {(char *) json_object_get_string(sticker_pack, "id"),
-                                (char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(sticker_pack, "stickers"))),
+                                (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(sticker_pack, "stickers"))),
                                 (char *) json_object_get_string(sticker_pack, "name"),
                                 (char *) json_object_get_string(sticker_pack, "sku_id"),
                                 (char *) json_object_get_string(sticker_pack, "cover_sticker_id"),
                                 (char *) json_object_get_string(sticker_pack, "description"),
-                                (char *) json_object_get_string(sticker_pack, "banner_asset_id ")
+                                (char *) json_object_get_string(sticker_pack, "banner_asset_id")
     };
 
     return result;

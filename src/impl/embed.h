@@ -24,8 +24,9 @@
 #include <stdbool.h>
 #include "../utils/utils.h"
 #include "parson.h"
+#include "../json/json.h"
 
-typedef struct yadl_embed {
+typedef struct __attribute__((__packed__)) {
     char *title;
     char *type;
     char *description;
@@ -49,7 +50,7 @@ typedef struct yadl_embed {
 
 } embed_t;
 
-typedef struct yadl_embed_thumbnail {
+typedef struct __attribute__((__packed__)) {
     char *url;
     char *proxy_url;
     int height;
@@ -57,7 +58,7 @@ typedef struct yadl_embed_thumbnail {
 
 } embed_thumbnail_t;
 
-typedef struct yadl_embed_video {
+typedef struct __attribute__((__packed__)) {
     char *url;
     char *proxy_url;
     int height;
@@ -65,7 +66,7 @@ typedef struct yadl_embed_video {
 
 } embed_video_t;
 
-typedef struct yadl_embed_image {
+typedef struct __attribute__((__packed__)) {
     char *url;
     char *proxy_url;
     int height;
@@ -73,13 +74,13 @@ typedef struct yadl_embed_image {
 
 } embed_image_t;
 
-typedef struct yadl_embed_provider {
+typedef struct __attribute__((__packed__)) {
     char *name;
     char *url;
 
 } embed_provider_t;
 
-typedef struct yadl_embed_author {
+typedef struct __attribute__((__packed__)) {
     char *name;
     char *url;
     char *icon_url;
@@ -87,14 +88,14 @@ typedef struct yadl_embed_author {
 
 } embed_author_t;
 
-typedef struct yadl_embed_footer {
+typedef struct __attribute__((__packed__)) {
     char *text;
     char *icon_url;
     char *proxy_icon_url;
 
 } embed_footer_t;
 
-typedef struct yadl_embed_field {
+typedef struct __attribute__((__packed__)) {
     char *name;
     char *value;
     bool inline_; // fuck

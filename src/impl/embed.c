@@ -29,13 +29,13 @@ embed_t *parse_embed(JSON_Value *embed_value) {
                          (char *) json_object_get_string(embed, "url"),
                          (char *) json_object_get_string(embed, "timestamp"),
                          (int) json_object_get_number(embed, "color"),
-                         (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(embed, "footer"))),
-                         (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(embed, "image"))),
-                         (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(embed, "thumbnail"))),
-                         (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(embed, "video"))),
-                         (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(embed, "provider"))),
-                         (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(embed, "author"))),
-                         (char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(embed, "fields")))
+                         (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(embed, "footer"))),
+                         (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(embed, "image"))),
+                         (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(embed, "thumbnail"))),
+                         (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(embed, "video"))),
+                         (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(embed, "provider"))),
+                         (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(embed, "author"))),
+                         (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(embed, "fields")))
     };
 
     return result;
@@ -81,7 +81,7 @@ embed_provider_t *parse_embed_provider(JSON_Value *embed_provider_value) {
     JSON_Object *embed_provider = json_object(embed_provider_value);
     embed_provider_t *result = yadl_malloc(sizeof(embed_provider_t), true);
     *result = (embed_provider_t) {(char *) json_object_get_string(embed_provider, "name"),
-                                  (char *) json_object_get_string(embed_provider, "url ")
+                                  (char *) json_object_get_string(embed_provider, "url")
     };
 
     return result;
@@ -115,7 +115,7 @@ embed_field_t *parse_embed_field(JSON_Value *embed_field_value) {
     embed_field_t *result = yadl_malloc(sizeof(embed_field_t), true);
     *result = (embed_field_t) {(char *) json_object_get_string(embed_field, "name"),
                                (char *) json_object_get_string(embed_field, "value"),
-                               json_object_get_boolean(embed_field, "inline")
+                               yadl_json_boolean_null_check(json_object_get_boolean(embed_field, "inline"))
     };
 
     return result;

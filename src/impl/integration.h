@@ -24,8 +24,9 @@
 #include <stdbool.h>
 #include "parson.h"
 #include "../utils/utils.h"
+#include "../json/json.h"
 
-typedef struct yadl_integration {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *name;
     char *type;
@@ -48,13 +49,13 @@ typedef struct yadl_integration {
 
 } integration_t;
 
-typedef struct yadl_integration_account {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *name;
 
 } integration_account_t;
 
-typedef struct yadl_integration_application {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *name;
     char *icon;

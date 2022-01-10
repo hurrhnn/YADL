@@ -24,8 +24,9 @@
 #include <stdbool.h>
 #include "parson.h"
 #include "../utils/utils.h"
+#include "../json/json.h"
 
-typedef struct yadl_channel {
+typedef struct __attribute__((__packed__)) {
     char *id;
     int type;
     char *guild_id;
@@ -59,7 +60,7 @@ typedef struct yadl_channel {
 
 } channel_t;
 
-typedef struct yadl_channel_mention {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *guild_id;
     int type;
@@ -67,7 +68,7 @@ typedef struct yadl_channel_mention {
 
 } channel_mention_t;
 
-typedef struct yadl_allowed_mentions {
+typedef struct __attribute__((__packed__)) {
     char *parse;
     /* array of allowed mention types */
     char *roles;

@@ -24,8 +24,9 @@
 #include <stdbool.h>
 #include "parson.h"
 #include "../utils/utils.h"
+#include "../json/json.h"
 
-typedef struct yadl_application {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *name;
     char *icon;

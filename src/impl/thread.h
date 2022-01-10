@@ -24,8 +24,9 @@
 #include <stdbool.h>
 #include "parson.h"
 #include "../utils/utils.h"
+#include "../json/json.h"
 
-typedef struct yadl_thread_metadata {
+typedef struct __attribute__((__packed__)) {
     bool archived;
     int auto_archive_duration;
     char *archive_timestamp;
@@ -34,7 +35,7 @@ typedef struct yadl_thread_metadata {
 
 } thread_metadata_t;
 
-typedef struct yadl_thread_member {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *user_id;
     char *join_timestamp;

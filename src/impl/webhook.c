@@ -28,13 +28,13 @@ webhook_t *parse_webhook(JSON_Value *webhook_value) {
                            (int) json_object_get_number(webhook, "type"),
                            (char *) json_object_get_string(webhook, "guild_id"),
                            (char *) json_object_get_string(webhook, "channel_id"),
-                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(webhook, "user"))),
+                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(webhook, "user"))),
                            (char *) json_object_get_string(webhook, "name"),
                            (char *) json_object_get_string(webhook, "avatar"),
                            (char *) json_object_get_string(webhook, "token"),
-                           (char *) json_object_get_string(webhook, "application_id "),
-                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(webhook, "source_guild"))),
-                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(webhook, "source_channel"))),
+                           (char *) json_object_get_string(webhook, "application_id"),
+                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(webhook, "source_guild"))),
+                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(webhook, "source_channel"))),
                            (char *) json_object_get_string(webhook, "url")
     };
 

@@ -24,8 +24,9 @@
 #include <stdbool.h>
 #include "parson.h"
 #include "../utils/utils.h"
+#include "../json/json.h"
 
-typedef struct yadl_message {
+typedef struct __attribute__((__packed__)) {
     char *channel_id;
     char *guild_id;
     char *author;
@@ -76,13 +77,13 @@ typedef struct yadl_message {
 
 } message_t;
 
-typedef struct yadl_message_activity {
+typedef struct __attribute__((__packed__)) {
     int type;
     char *party_id;
 
 } message_activity_t;
 
-typedef struct yadl_message_reference {
+typedef struct __attribute__((__packed__)) {
     char *message_id;
     char *channel_id;
     char *guild_id;
@@ -90,7 +91,7 @@ typedef struct yadl_message_reference {
 
 } message_reference_t;
 
-typedef struct yadl_followed_channel {
+typedef struct __attribute__((__packed__)) {
     char *channel_id;
     char *webhook_id;
 

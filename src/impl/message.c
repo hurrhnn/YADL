@@ -26,34 +26,34 @@ message_t *parse_message(JSON_Value *message_value) {
 
     *result = (message_t) {(char *) json_object_get_string(message, "channel_id"),
                            (char *) json_object_get_string(message, "guild_id"),
-                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(message, "author"))),
-                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(message, "member"))),
+                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(message, "author"))),
+                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(message, "member"))),
                            (char *) json_object_get_string(message, "content"),
                            (char *) json_object_get_string(message, "timestamp"),
                            (char *) json_object_get_string(message, "edited_timestamp"),
-                           json_object_get_boolean(message, "tts"),
-                           json_object_get_boolean(message, "mention_everyone"),
-                           (char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(message, "mentions"))),
-                           (char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(message, "mention_roles"))),
-                           (char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(message, "mention_channels"))),
-                           (char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(message, "attachments"))),
-                           (char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(message, "embeds"))),
-                           (char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(message, "reactions"))),
+                           yadl_json_boolean_null_check(json_object_get_boolean(message, "tts")),
+                           yadl_json_boolean_null_check(json_object_get_boolean(message, "mention_everyone")),
+                           (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(message, "mentions"))),
+                           (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(message, "mention_roles"))),
+                           (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(message, "mention_channels"))),
+                           (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(message, "attachments"))),
+                           (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(message, "embeds"))),
+                           (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(message, "reactions"))),
                            (char *) json_object_get_string(message, "nonce"),
-                           json_object_get_boolean(message, "pinned"),
+                           yadl_json_boolean_null_check(json_object_get_boolean(message, "pinned")),
                            (char *) json_object_get_string(message, "webhook_id"),
                            (int) json_object_get_number(message, "type"),
-                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(message, "activity"))),
-                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(message, "application"))),
+                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(message, "activity"))),
+                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(message, "application"))),
                            (char *) json_object_get_string(message, "application_id"),
-                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(message, "message_reference"))),
+                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(message, "message_reference"))),
                            (int) json_object_get_number(message, "flags"),
-                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(message, "referenced_message"))),
-                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(message, "interaction"))),
-                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(message, "thread"))),
-                           (char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(message, "components"))),
-                           (char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(message, "sticker_items"))),
-                           (char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(message, "stickers")))
+                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(message, "referenced_message"))),
+                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(message, "interaction"))),
+                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(message, "thread"))),
+                           (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(message, "components"))),
+                           (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(message, "sticker_items"))),
+                           (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(message, "stickers")))
     };
 
     return result;
@@ -77,7 +77,7 @@ message_reference_t *parse_message_reference(JSON_Value *message_reference_value
     *result = (message_reference_t) {(char *) json_object_get_string(message_reference, "message_id"),
                                      (char *) json_object_get_string(message_reference, "channel_id"),
                                      (char *) json_object_get_string(message_reference, "guild_id"),
-                                     json_object_get_boolean(message_reference, "fail_if_not_exists")
+                                     yadl_json_boolean_null_check(json_object_get_boolean(message_reference, "fail_if_not_exists"))
     };
 
     return result;

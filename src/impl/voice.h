@@ -24,8 +24,9 @@
 #include <stdbool.h>
 #include "parson.h"
 #include "../utils/utils.h"
+#include "../json/json.h"
 
-typedef struct yadl_voice_state {
+typedef struct __attribute__((__packed__)) {
     char *guild_id;
     char *channel_id;
     char *user_id;
@@ -43,7 +44,7 @@ typedef struct yadl_voice_state {
 
 } voice_state_t;
 
-typedef struct yadl_voice_region {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *name;
     bool optimal;

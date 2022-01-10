@@ -21,13 +21,14 @@
 #include <parson.h>
 #include <stdbool.h>
 #include "../utils/utils.h"
+#include "../json/json.h"
 
 #ifndef YADL_USER_H
 #define YADL_USER_H
 
 #define YADL_USER_AVATAR "/avatars/%s/%s.png"
 
-typedef struct yadl_user {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *username;
     char *discriminator;

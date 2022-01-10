@@ -25,17 +25,17 @@ invite_t *parse_invite(JSON_Value *invite_value) {
     invite_t *result = yadl_malloc(sizeof(invite_t), true);
 
     *result = (invite_t) {(char *) json_object_get_string(invite, "code"),
-                          (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(invite, "guild"))),
-                          (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(invite, "channel"))),
-                          (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(invite, "inviter"))),
+                          (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(invite, "guild"))),
+                          (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(invite, "channel"))),
+                          (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(invite, "inviter"))),
                           (int) json_object_get_number(invite, "target_type"),
-                          (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(invite, "target_user"))),
-                          (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(invite, "target_application"))),
+                          (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(invite, "target_user"))),
+                          (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(invite, "target_application"))),
                           (int) json_object_get_number(invite, "approximate_presence_count"),
                           (int) json_object_get_number(invite, "approximate_member_count"),
                           (char *) json_object_get_string(invite, "expires_at"),
-                          (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(invite, "stage_instance"))),
-                          (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(invite, "guild_scheduled_event")))
+                          (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(invite, "stage_instance"))),
+                          (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(invite, "guild_scheduled_event")))
     };
 
     return result;
@@ -48,7 +48,7 @@ invite_metadata_t *parse_invite_metadata(JSON_Value *invite_metadata_value) {
     *result = (invite_metadata_t) {(int) json_object_get_number(invite_metadata, "uses"),
                                    (int) json_object_get_number(invite_metadata, "max_uses"),
                                    (int) json_object_get_number(invite_metadata, "max_age"),
-                                   json_object_get_boolean(invite_metadata, "temporary "),
+                                   yadl_json_boolean_null_check(json_object_get_boolean(invite_metadata, "temporary")),
                                    (char *) json_object_get_string(invite_metadata, "created_at")
     };
 
@@ -59,7 +59,7 @@ invite_stage_instance_t *parse_invite_stage_instance(JSON_Value *invite_stage_in
     JSON_Object *invite_stage_instance = json_object(invite_stage_instance_value);
     invite_stage_instance_t *result = yadl_malloc(sizeof(invite_stage_instance_t), true);
 
-    *result = (invite_stage_instance_t) {(char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(invite_stage_instance, "members"))),
+    *result = (invite_stage_instance_t) {(char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(invite_stage_instance, "members"))),
                                          (int) json_object_get_number(invite_stage_instance, "participant_count"),
                                          (int) json_object_get_number(invite_stage_instance, "speaker_count"),
                                          (char *) json_object_get_string(invite_stage_instance, "topic")
@@ -79,7 +79,7 @@ stage_instance_t *parse_stage_instance(JSON_Value *stage_instance_value) {
                                   (char *) json_object_get_string(stage_instance, "channel_id"),
                                   (char *) json_object_get_string(stage_instance, "topic"),
                                   (int) json_object_get_number(stage_instance, "privacy_level"),
-                                  json_object_get_boolean(stage_instance, "discoverable_disabled")
+                                  yadl_json_boolean_null_check(json_object_get_boolean(stage_instance, "discoverable_disabled"))
     };
 
     return result;

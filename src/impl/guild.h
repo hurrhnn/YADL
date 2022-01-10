@@ -24,9 +24,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "../utils/utils.h"
+#include "../json/json.h"
 #include "parson.h"
 
-typedef struct yadl_guild {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *name;
     char *icon;
@@ -94,7 +95,7 @@ typedef struct yadl_guild {
 
 } guild_t;
 
-typedef struct yadl_guild_preview {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *name;
     char *icon;
@@ -110,13 +111,13 @@ typedef struct yadl_guild_preview {
 
 } guild_preview_t;
 
-typedef struct yadl_guild_widget {
+typedef struct __attribute__((__packed__)) {
     bool enabled;
     char *channel_id;
 
 } guild_widget_t;
 
-typedef struct yadl_guild_member {
+typedef struct __attribute__((__packed__)) {
     char *user;
     /* user object */
     char *nick;
@@ -133,21 +134,21 @@ typedef struct yadl_guild_member {
 
 } guild_member_t;
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
     char *reason;
     char *user;
     /* user object */
 
 } ban_t;
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
     char *description;
     char *welcome_channels;
     /* array of welcome screen channel objects */
 
 } welcome_screen_t;
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
     char *channel_id;
     char *description;
     char *emoji_id;
@@ -155,7 +156,7 @@ typedef struct {
 
 } welcome_screen_channel_t;
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *guild_id;
     char *channel_id;
@@ -179,7 +180,7 @@ typedef struct {
 
 } guild_scheduled_event_t;
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
     char *guild_scheduled_event_id;
     char *user;
     /* user */
@@ -188,7 +189,7 @@ typedef struct {
 
 } guild_scheduled_event_user_t;
 
-typedef struct {
+typedef struct __attribute__((__packed__)) {
     char *code;
     char *name;
     char *description;

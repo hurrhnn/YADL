@@ -24,8 +24,9 @@
 #include <stdbool.h>
 #include "parson.h"
 #include "../utils/utils.h"
+#include "../json/json.h"
 
-typedef struct yadl_sticker {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *pack_id;
     char *name;
@@ -42,14 +43,14 @@ typedef struct yadl_sticker {
 
 } sticker_t;
 
-typedef struct yadl_sticker_item {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *name;
     int format_type;
 
 } sticker_item_t;
 
-typedef struct yadl_sticker_pack {
+typedef struct __attribute__((__packed__)) {
     char *id;
     char *stickers;
     /* array of sticker objects */

@@ -19,8 +19,6 @@
 */
 
 #include "emoji.h"
-#include "parson.h"
-#include "../utils/utils.h"
 
 emoji_t *parse_emoji(JSON_Value *emoji_value) {
     JSON_Object *emoji = json_object(emoji_value);
@@ -28,12 +26,12 @@ emoji_t *parse_emoji(JSON_Value *emoji_value) {
 
     *result = (emoji_t) {(char *) json_object_get_string(emoji, "id"),
                          (char *) json_object_get_string(emoji, "name"),
-                         (char *) json_serialize_to_string(json_array_get_wrapping_value(json_object_get_array(emoji, "roles"))),
-                         (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(emoji, "user"))),
-                         json_object_get_boolean(emoji, "require_colons"),
-                         json_object_get_boolean(emoji, "managed"),
-                         json_object_get_boolean(emoji, "animated"),
-                         json_object_get_boolean(emoji, "available")
+                         (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(emoji, "roles"))),
+                         (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(emoji, "user"))),
+                         yadl_json_boolean_null_check(json_object_get_boolean(emoji, "require_colons")),
+                         yadl_json_boolean_null_check(json_object_get_boolean(emoji, "managed")),
+                         yadl_json_boolean_null_check(json_object_get_boolean(emoji, "animated")),
+                         yadl_json_boolean_null_check(json_object_get_boolean(emoji, "available"))
     };
 
     return result;

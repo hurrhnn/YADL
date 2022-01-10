@@ -21,4 +21,6 @@
 #ifndef YADL_CREATE_MESSAGE_H
 #define YADL_CREATE_MESSAGE_H
 
+#define YADL_CREATE_MESSAGE_PATH "/channels/%s/messages"
+
 #endif //YADL_CREATE_MESSAGE_H

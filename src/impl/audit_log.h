@@ -25,7 +25,7 @@
 #include "parson.h"
 #include "../utils/utils.h"
 
-typedef struct yadl_audit_log {
+typedef struct __attribute__((__packed__)) {
     char *audit_log_entries;
     /* array of audit log entry objects */
     char *guild_scheduled_events;
@@ -41,7 +41,7 @@ typedef struct yadl_audit_log {
 
 } audit_log_t;
 
-typedef struct yadl_audit_log_entry {
+typedef struct __attribute__((__packed__)) {
     char *target_id;
     char *changes;
     /* array of audit log change objects */
@@ -55,7 +55,7 @@ typedef struct yadl_audit_log_entry {
 
 } audit_log_entry_t;
 
-typedef struct yadl_audit_log_change {
+typedef struct __attribute__((__packed__)) {
     char *old_value;
     /* mixed */
     char *key;

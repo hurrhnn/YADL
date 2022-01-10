@@ -24,11 +24,11 @@ thread_metadata_t *parse_thread_metadata(JSON_Value *thread_metadata_value) {
     JSON_Object *thread_metadata = json_object(thread_metadata_value);
     thread_metadata_t *result = yadl_malloc(sizeof(thread_metadata_t), true);
 
-    *result = (thread_metadata_t) {json_object_get_boolean(thread_metadata, "archived"),
+    *result = (thread_metadata_t) {yadl_json_boolean_null_check(json_object_get_boolean(thread_metadata, "archived")),
                                    (int) json_object_get_number(thread_metadata, "auto_archive_duration"),
                                    (char *) json_object_get_string(thread_metadata, "archive_timestamp"),
-                                   json_object_get_boolean(thread_metadata, "locked"),
-                                   json_object_get_boolean(thread_metadata, "invitable")
+                                   yadl_json_boolean_null_check(json_object_get_boolean(thread_metadata, "locked")),
+                                   yadl_json_boolean_null_check(json_object_get_boolean(thread_metadata, "invitable"))
     };
 
     return result;

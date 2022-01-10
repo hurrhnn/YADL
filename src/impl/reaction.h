@@ -24,8 +24,9 @@
 #include <stdbool.h>
 #include "parson.h"
 #include "../utils/utils.h"
+#include "../json/json.h"
 
-typedef struct yadl_reaction {
+typedef struct __attribute__((__packed__)) {
     int count;
     bool me;
     char *emoji;

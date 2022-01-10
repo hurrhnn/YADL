@@ -27,18 +27,18 @@ integration_t *parse_integration(JSON_Value *integration_value) {
     *result = (integration_t) {(char *) json_object_get_string(integration, "id"),
                                (char *) json_object_get_string(integration, "name"),
                                (char *) json_object_get_string(integration, "type"),
-                               json_object_get_boolean(integration, "enabled"),
-                               json_object_get_boolean(integration, "syncing"),
+                               yadl_json_boolean_null_check(json_object_get_boolean(integration, "enabled")),
+                               yadl_json_boolean_null_check(json_object_get_boolean(integration, "syncing")),
                                (char *) json_object_get_string(integration, "role_id"),
-                               json_object_get_boolean(integration, "enable_emoticons"),
-                               (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(integration, "expire_behavior"))),
+                               yadl_json_boolean_null_check(json_object_get_boolean(integration, "enable_emoticons")),
+                               (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(integration, "expire_behavior"))),
                                (int) json_object_get_number(integration, "expire_grace_period "),
-                               (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(integration, "user"))),
-                               (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(integration, "account"))),
+                               (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(integration, "user"))),
+                               (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(integration, "account"))),
                                (char *) json_object_get_string(integration, "synced_at"),
                                (int) json_object_get_number(integration, "subscriber_count"),
-                               json_object_get_boolean(integration, "revoked"),
-                               (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(integration, "application")))
+                               yadl_json_boolean_null_check(json_object_get_boolean(integration, "revoked")),
+                               (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(integration, "application")))
     };
 
     return result;
@@ -49,7 +49,7 @@ integration_account_t *parse_integration_account(JSON_Value *integration_account
     integration_account_t *result = yadl_malloc(sizeof(integration_account_t), true);
 
     *result = (integration_account_t) {(char *) json_object_get_string(integration_account, "id"),
-                                       (char *) json_object_get_string(integration_account, "name ")
+                                       (char *) json_object_get_string(integration_account, "name")
     };
 
     return result;
@@ -64,7 +64,7 @@ integration_application_t *parse_integration_application(JSON_Value *integration
                                            (char *) json_object_get_string(integration_application, "icon"),
                                            (char *) json_object_get_string(integration_application, "description"),
                                            (char *) json_object_get_string(integration_application, "summary"),
-                                           (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(integration_application, "bot")))
+                                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(integration_application, "bot")))
     };
 
     return result;

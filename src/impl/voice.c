@@ -27,15 +27,15 @@ voice_state_t *parse_voice_state(JSON_Value *voice_state_value) {
     *result = (voice_state_t) {(char *) json_object_get_string(voice_state, "guild_id"),
                                (char *) json_object_get_string(voice_state, "channel_id"),
                                (char *) json_object_get_string(voice_state, "user_id"),
-                               (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(voice_state, "member"))),
+                               (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(voice_state, "member"))),
                                (char *) json_object_get_string(voice_state, "session_id"),
-                               json_object_get_boolean(voice_state, "deaf"),
-                               json_object_get_boolean(voice_state, "mute"),
-                               json_object_get_boolean(voice_state, "self_deaf"),
-                               json_object_get_boolean(voice_state, "self_mute"),
-                               json_object_get_boolean(voice_state, "self_stream"),
-                               json_object_get_boolean(voice_state, "self_video"),
-                               json_object_get_boolean(voice_state, "suppress"),
+                               yadl_json_boolean_null_check(json_object_get_boolean(voice_state, "deaf")),
+                               yadl_json_boolean_null_check(json_object_get_boolean(voice_state, "mute")),
+                               yadl_json_boolean_null_check(json_object_get_boolean(voice_state, "self_deaf")),
+                               yadl_json_boolean_null_check(json_object_get_boolean(voice_state, "self_mute")),
+                               yadl_json_boolean_null_check(json_object_get_boolean(voice_state, "self_stream")),
+                               yadl_json_boolean_null_check(json_object_get_boolean(voice_state, "self_video")),
+                               yadl_json_boolean_null_check(json_object_get_boolean(voice_state, "suppress")),
                                (char *) json_object_get_string(voice_state, "request_to_speak_timestamp")
     };
 
@@ -48,9 +48,9 @@ voice_region_t *parse_voice_region(JSON_Value *voice_region_value) {
 
     *result = (voice_region_t) {(char *) json_object_get_string(voice_region, "id"),
                                 (char *) json_object_get_string(voice_region, "name"),
-                                json_object_get_boolean(voice_region, "optimal"),
-                                json_object_get_boolean(voice_region, "deprecated"),
-                                json_object_get_boolean(voice_region, "custom")
+                                yadl_json_boolean_null_check(json_object_get_boolean(voice_region, "optimal")),
+                                yadl_json_boolean_null_check(json_object_get_boolean(voice_region, "deprecated")),
+                                yadl_json_boolean_null_check(json_object_get_boolean(voice_region, "custom"))
     };
 
     return result;

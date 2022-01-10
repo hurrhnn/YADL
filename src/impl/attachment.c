@@ -25,14 +25,14 @@ attachment_t *parse_attachment(JSON_Value *attachment_value) {
     attachment_t *result = yadl_malloc(sizeof(attachment_t), true);
 
     *result = (attachment_t) {(char *) json_object_get_string(attachment, "filename"),
-                              (char *) json_object_get_string(attachment, "description "),
+                              (char *) json_object_get_string(attachment, "description"),
                               (char *) json_object_get_string(attachment, "content_type"),
                               (int) json_object_get_number(attachment, "size"),
                               (char *) json_object_get_string(attachment, "url"),
                               (char *) json_object_get_string(attachment, "proxy_url"),
                               (int) json_object_get_number(attachment, "height"),
                               (int) json_object_get_number(attachment, "width"),
-                              json_object_get_boolean(attachment, "ephemeral ")
+                              yadl_json_boolean_null_check(json_object_get_boolean(attachment, "ephemeral"))
     };
 
     return result;

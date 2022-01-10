@@ -24,7 +24,7 @@
 #include "parson.h"
 #include "../utils/utils.h"
 
-typedef struct yadl_webhook {
+typedef struct __attribute__((__packed__)) {
     char *id;
     int type;
     char *guild_id;

@@ -25,8 +25,8 @@ reaction_t *parse_reaction(JSON_Value *reaction_value) {
     reaction_t *result = yadl_malloc(sizeof(reaction_t), true);
 
     *result = (reaction_t) {(int) json_object_get_number(reaction, "count"),
-                            json_object_get_boolean(reaction, "me"),
-                            (char *) json_serialize_to_string(json_object_get_wrapping_value(json_object_get_object(reaction, "emoji")))
+                            yadl_json_boolean_null_check(json_object_get_boolean(reaction, "me")),
+                            (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(reaction, "emoji")))
     };
 
     return result;
