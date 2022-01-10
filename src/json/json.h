@@ -30,6 +30,8 @@ JSON_Object *yadl_json_object_builder(const char *raw);
 
 JSON_Array *yadl_json_array_builder();
 
+bool yadl_json_boolean_null_check(int result);
+
 void yadl_json_lws_write(struct lws *client_wsi, JSON_Object *root_object);
 
 #endif //YADL_JSON_H
