@@ -18,11 +18,13 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <libwebsockets.h>
+#include "libwebsockets.h"
 #include <stdbool.h>
 
-#include "../../impl/impl.h"
-#include "../../yadl.h"
+#include "../yadl.h"
+#include "../json/json.h"
+#include "../http/http_request.h"
+#include "../gc/pthread.h"
 
 #ifndef YADL_MAIN_CLIENT_H
 #define YADL_MAIN_CLIENT_H
