@@ -48,7 +48,10 @@ typedef struct yadl_context_info {
 typedef struct yadl_context {
     yadl_context_info_t info;
     yadl_event_cb_t callbacks;
+
+    self_user_t *self_user;
     obj_list_t *guilds;
+    obj_list_t *users;
 } yadl_context_t;
 
 void yadl_init(yadl_context_t *yadl_context);
