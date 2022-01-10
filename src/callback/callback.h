@@ -22,10 +22,13 @@
 #define YADL_CALLBACK_H
 
 #include <stdint.h>
+#include "../impl/impl.h"
 #include "../impl/user.h"
 #include "../impl/guild.h"
 
 typedef struct yadl_context yadl_context_t;
+
+typedef struct yadl_object_metadata yadl_object_metadata_t;
 
 struct yadl_event_on_ready {
     yadl_context_t *context;
@@ -48,5 +51,7 @@ typedef struct yadl_event_cb {
     yadl_event_on_guild_create_t on_guild_create;
     void *user_data;
 } yadl_event_cb_t;
+
+yadl_object_metadata_t *yadl_get_object_metadata(size_t type);
 
 #endif //YADL_CALLBACK_H
