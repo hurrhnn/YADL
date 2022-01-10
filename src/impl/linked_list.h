@@ -31,17 +31,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-
 #include "../utils/utils.h"
 
-typedef struct obj_linked_list {
+typedef struct obj_list{
     char *key;
     void *value;
-    struct obj_linked_list *next;
-    size_t count;
+    struct obj_list *next;
 } obj_list_t;
 
-obj_list_t *put_list(obj_list_t *list, char *key, void *value);
+obj_list_t *put_list(size_t type, obj_list_t *list, char *key, void *value);
 
 void *get_list(obj_list_t *list, char *key);
 

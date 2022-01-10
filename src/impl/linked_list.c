@@ -25,21 +25,19 @@
 */
 
 #include "linked_list.h"
+#include "impl.h"
 
-
-obj_list_t *put_list(obj_list_t *list, char *key, void *value) {
+obj_list_t *put_list(size_t type, obj_list_t *list, char *key, void *value) {
     if (list == NULL) {
         list = yadl_malloc(sizeof(obj_list_t), true);
-        *list = (obj_list_t) {key, value, NULL};
-        list->count++;
+        *list = (obj_list_t) { key, value, NULL };
         return list;
     }
 
     if (!strcmp(key, list->key))
-        list->value = value;
+        list->value = yadl_object_overridable(type) ? yadl_object_override(list, key, value, yadl_get_object_metadata(type)) : value;
     else
-        list->next = put_list(list->next, key, value);
-    list->count++;
+        list->next = put_list(type, list->next, key, value);
     return list;
 }
 
