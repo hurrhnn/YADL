@@ -37,14 +37,15 @@ void yadl_init(yadl_context_t *yadl_context) {
     sprintf(yadl_info->APPLICATION, "%s v%s", YADL_APPLICATION, YADL_VERSION);
 
     yadl_gc_init();
+    yadl_object_init(yadl_context);
 }
 
 void yadl_launch(yadl_context_t *yadl_context) {
-    lws_set_log_level(LLL_USER | LLL_ERR, NULL);
+    lws_set_log_level(LLL_ERR, NULL);
     start_main_client(yadl_context);
 }
 
 void yadl_cleanup() {
     free_node(yadl_gc_get_context(YADL_GC_NODE_ADDRESS));
-    free_node(yadl_gc_get_context((int8_t)YADL_NON_GC_NODE));
+    free_node(yadl_gc_get_context((int8_t) YADL_NON_GC_NODE));
 }
