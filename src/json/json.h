@@ -21,10 +21,10 @@
 #ifndef YADL_JSON_H
 #define YADL_JSON_H
 
-#include <parson.h>
-#include <libwebsockets.h>
+#include "parson.h"
+#include "libwebsockets.h"
 
-#include "../utils.h"
+#include "../utils/utils.h"
 
 JSON_Object *yadl_json_object_builder(const char *raw);
 
