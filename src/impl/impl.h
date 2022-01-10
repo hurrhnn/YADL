@@ -18,6 +18,9 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifndef YADL_IMPL_H
+#define YADL_IMPL_H
+
 #include "callback.h"
 #include "guild.h"
 #include "linked_list.h"
@@ -36,10 +39,6 @@
 #include "invite.h"
 #include "voice.h"
 #include "webhook.h"
-
-#ifndef YADL_IMPL_H
-#define YADL_IMPL_H
-
 
 #define YADL_OBJECT_APPLICATION 0
 #define YADL_OBJECT_AUDIT_LOG 1

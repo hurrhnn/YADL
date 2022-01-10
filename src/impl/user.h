@@ -20,10 +20,12 @@
 
 #include <parson.h>
 #include <stdbool.h>
-#include "../yadl.h"
+#include "../utils/utils.h"
 
 #ifndef YADL_USER_H
 #define YADL_USER_H
+
+#define YADL_USER_AVATAR "/avatars/%s/%s.png"
 
 typedef struct yadl_user {
     char *id;
