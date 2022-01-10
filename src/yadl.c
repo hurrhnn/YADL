@@ -19,7 +19,7 @@
 */
 
 #include "yadl.h"
-#include "utils/websockets/main_client.h"
+#include "websockets/main_client.h"
 
 void yadl_init(yadl_context_t *yadl_context) {
     yadl_context_info_t *yadl_info = &yadl_context->info;

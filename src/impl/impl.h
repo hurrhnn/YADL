@@ -21,7 +21,7 @@
 #ifndef YADL_IMPL_H
 #define YADL_IMPL_H
 
-#include "callback.h"
+#include "../callback/callback.h"
 #include "guild.h"
 #include "linked_list.h"
 #include "user.h"
