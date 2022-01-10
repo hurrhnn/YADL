@@ -23,64 +23,206 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "../utils/utils.h"
 #include "parson.h"
 
 typedef struct yadl_guild {
     char *id;
     char *name;
     char *icon;
+    char *icon_hash;
     char *splash;
     char *discovery_splash;
     bool owner;
     char *owner_id;
     char *permissions;
+    char *region;
     char *afk_channel_id;
-    int32_t afk_timeout;
+    int afk_timeout;
     bool widget_enabled;
     char *widget_channel_id;
-    int8_t verification_level;
-    int8_t default_message_notifications;
-    int8_t explicit_content_filter;
-
-    char *roles, *emojis, *features;
-    /* roles, emojis, features object */
-
-    int8_t mfa_level;
+    int verification_level;
+    int default_message_notifications;
+    int explicit_content_filter;
+    char *roles;
+    /* array of role objects */
+    char *emojis;
+    /* array of emoji objects */
+    char *features;
+    /* array of guild feature strings */
+    int mfa_level;
     char *application_id;
     char *system_channel_id;
-    int8_t system_channel_flags;
-    char* rules_channel_id;
-    char* joined_at;
+    int system_channel_flags;
+    char *rules_channel_id;
+    char *joined_at;
     bool large;
     bool unavailable;
-    int32_t member_count;
-
-    char *voice_states, *members, *channels, *threads, *presences;
-    /* voice_states, members, channels, threads, presences object */
-
-    int32_t max_members;
+    int member_count;
+    char *voice_states;
+    /* array of partial voice state objects */
+    char *members;
+    /* array of guild member objects */
+    char *channels;
+    /* array of channel objects */
+    char *threads;
+    /* array of channel objects */
+    char *presences;
+    /* array of partial presence update objects */
+    int max_presences;
+    int max_members;
     char *vanity_url_code;
     char *description;
     char *banner;
-    int8_t premium_tier;
-    int32_t premium_subscription_count;
+    int premium_tier;
+    int premium_subscription_count;
     char *preferred_locale;
     char *public_updates_channel_id;
-    int32_t max_video_channel_users;
-    int32_t approximate_member_count;
-    int32_t approximate_presence_count;
-
+    int max_video_channel_users;
+    int approximate_member_count;
+    int approximate_presence_count;
     char *welcome_screen;
-    /* welcome_screen object */
-
-    int8_t nsfw_level;
-
-    char *stage_instances, *stickers, *guild_scheduled_events;
-    /* stage_instances, stickers, guild_scheduled_events */
-
+    /* welcome screen object */
+    int nsfw_level;
+    char *stage_instances;
+    /* array of stage instance objects */
+    char *stickers;
+    /* array of sticker objects */
+    char *guild_scheduled_events;
+    /* array of guild scheduled event objects */
     bool premium_progress_bar_enabled;
-}guild_t;
+
+} guild_t;
+
+typedef struct yadl_guild_preview {
+    char *id;
+    char *name;
+    char *icon;
+    char *splash;
+    char *discovery_splash;
+    char *emojis;
+    /* array of emoji objects */
+    char *features;
+    /* array of guild feature strings */
+    int approximate_member_count;
+    int approximate_presence_count;
+    char *description;
+
+} guild_preview_t;
+
+typedef struct yadl_guild_widget {
+    bool enabled;
+    char *channel_id;
+
+} guild_widget_t;
+
+typedef struct yadl_guild_member {
+    char *user;
+    /* user object */
+    char *nick;
+    char *avatar;
+    char *roles;
+    /* array of snowflakes */
+    char *joined_at;
+    char *premium_since;
+    bool deaf;
+    bool mute;
+    bool pending;
+    char *permissions;
+    char *communication_disabled_until;
+
+} guild_member_t;
+
+typedef struct {
+    char *reason;
+    char *user;
+    /* user object */
+
+} ban_t;
+
+typedef struct {
+    char *description;
+    char *welcome_channels;
+    /* array of welcome screen channel objects */
+
+} welcome_screen_t;
+
+typedef struct {
+    char *channel_id;
+    char *description;
+    char *emoji_id;
+    char *emoji_name;
+
+} welcome_screen_channel_t;
+
+typedef struct {
+    char *id;
+    char *guild_id;
+    char *channel_id;
+    char *creator_id;
+    char *name;
+    char *description;
+    char *scheduled_start_time;
+    char *scheduled_end_time;
+    char *privacy_level;
+    /* privacy level */
+    char *status;
+    /* event status */
+    char *entity_type;
+    /* scheduled entity type */
+    char *entity_id;
+    char *entity_metadata;
+    /* entity metadata */
+    char *creator;
+    /* user object */
+    int user_count;
+
+} guild_scheduled_event_t;
+
+typedef struct {
+    char *guild_scheduled_event_id;
+    char *user;
+    /* user */
+    char *member;
+    /* guild member */
+
+} guild_scheduled_event_user_t;
+
+typedef struct {
+    char *code;
+    char *name;
+    char *description;
+    int usage_count;
+    char *creator_id;
+    char *creator;
+    /* user object */
+    char *created_at;
+    char *updated_at;
+    char *source_guild_id;
+    char *serialized_source_guild;
+    /* partial guild object */
+    bool is_dirty;
+
+} guild_template_t;
 
 guild_t *parse_guild(JSON_Value *guild_value);
+
+guild_preview_t *parse_guild_preview(JSON_Value *guild_preview_value);
+
+guild_widget_t *parse_guild_widget(JSON_Value *guild_widget_value);
+
+guild_member_t *parse_guild_member(JSON_Value *guild_member_value);
+
+ban_t *parse_ban(JSON_Value *ban_value);
+
+welcome_screen_t *parse_welcome_screen(JSON_Value *welcome_screen_value);
+
+welcome_screen_channel_t *parse_welcome_screen_channel(JSON_Value *welcome_screen_channel_value);
+
+guild_scheduled_event_t *parse_guild_scheduled_event(JSON_Value *guild_scheduled_event_value);
+
+guild_scheduled_event_user_t *parse_guild_scheduled_event_user(JSON_Value *guild_scheduled_event_user_value);
+
+guild_template_t *parse_guild_template(JSON_Value *guild_template_value);
 
 #endif //YADL_GUILD_H
