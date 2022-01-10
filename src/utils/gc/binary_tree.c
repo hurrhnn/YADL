@@ -179,8 +179,9 @@ void scan_node(gc_node_t *main_node, gc_node_t *sub_node, int8_t node) {
     } else {
         if (main_node->address != NULL) {
             if (!main_node->mark) {
-                free(main_node->address);
                 delete_node(main_node, main_node->address, node);
+                free(main_node->address);
+                main_node->address = 0x0;
             } else
                 main_node->mark = (int8_t) (main_node->mark == -1 ? main_node->mark : false);
         }
