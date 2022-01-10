@@ -19,23 +19,28 @@
 */
 
 #include "user.h"
-#include "../yadl.h"
 
 user_t *parse_user(JSON_Value *user_value) {
     JSON_Object *user = json_object(user_value);
     user_t *result = yadl_malloc(sizeof(user_t));
 
-    *result = (user_t) {json_object_get_boolean(user, "verified"),
+    *result = (user_t) {(char *) json_object_get_string(user, "id"),
                         (char *) json_object_get_string(user, "username"),
-                        json_object_get_boolean(user, "mfa_enabled"),
-                        (char *) json_object_get_string(user, "id"),
-                        (int) json_object_get_number(user, "flags"),
-                        (int) json_object_get_number(user, "public_flags"),
-                        (char *) json_object_get_string(user, "email"),
                         (char *) json_object_get_string(user, "discriminator"),
-                        json_object_get_boolean(user, "bot"),
                         (char *) json_object_get_string(user, "avatar"),
+                        json_object_get_boolean(user, "bot"),
+                        json_object_get_boolean(user, "system"),
+                        json_object_get_boolean(user, "mfa_enabled"),
+                        (char *) json_object_get_string(user, "banner"),
+                        (int) json_object_get_number(user, "accent_color"),
+                        (char *) json_object_get_string(user, "locale"),
+                        json_object_get_boolean(user, "verified"),
+                        (char *) json_object_get_string(user, "email"),
+                        (int) json_object_get_number(user, "flags"),
+                        (int) json_object_get_number(user, "premium_type"),
+                        (int) json_object_get_number(user, "public_flags")
     };
+
     char *avatar = yadl_malloc(YADL_MIDIUM_SIZE);
     sprintf(avatar, yadl_strcat(YADL_CDN_URL, YADL_USER_AVATAR), result->id, result->avatar);
     result->avatar = avatar;

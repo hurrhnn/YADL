@@ -20,23 +20,29 @@
 
 #include <parson.h>
 #include <stdbool.h>
+#include "../yadl.h"
 
 #ifndef YADL_USER_H
 #define YADL_USER_H
 
 typedef struct yadl_user {
-    bool verified;
-    char *username;
-    bool mfa_enabled;
     char *id;
-    int flags;
-    int public_flags;
-    char *email;
-    char * discriminator;
-    bool bot;
+    char *username;
+    char *discriminator;
     char *avatar;
+    bool bot;
+    bool system;
+    bool mfa_enabled;
+    char *banner;
+    int accent_color;
+    char *locale;
+    bool verified;
+    char *email;
+    int flags;
+    int premium_type;
+    int public_flags;
 
-}yadl_user;
+} yadl_user;
 
 typedef yadl_user user_t;
 typedef yadl_user self_user_t;
