@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <unistd.h>
-#include <parson.h>
+#include "parson.h"
 
 #include "binary_tree.h"
 #include "pthread.h"
