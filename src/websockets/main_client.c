@@ -19,6 +19,7 @@
 */
 
 #include "main_client.h"
+#include "../api/create_message.h"
 
 static const u_int32_t backoff_ms[] = {1000, 2000, 3000, 4000, 5000 };
 
@@ -181,6 +182,7 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                     void *user_data = ws_payload->yadl_context->callbacks.user_data;
                     if (!strcmp(type, "READY")) {
                         ws_payload->client_object->self_user = parse_user(json_object_dotget_value(data_object, "user"));
+                        ws_payload->yadl_context->self_user = ws_payload->client_object->self_user;
                         memcpy(ws_payload->client_object->session_id, json_object_dotget_string(data_object, "session_id"), YADL_MAIN_SESSION_ID_LENGTH);
 
                         struct yadl_event_on_ready *on_ready = yadl_malloc(sizeof(struct yadl_event_on_ready));
@@ -192,14 +194,15 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 
                         for(int i = 0; i < on_ready->unavailable_guild_count; i++) {
                             guild_t *unavailable_guild = parse_guild(json_array_get_value(unavailable_guilds, i));
-                            put_list(ws_payload->yadl_context->guilds, unavailable_guild->id, unavailable_guild);
+                            put_list(YADL_OBJECT_GUILD, ws_payload->yadl_context->guilds, unavailable_guild->id, unavailable_guild);
                         }
                         on_ready->context = ws_payload->yadl_context;
                         ws_payload->yadl_context->callbacks.on_ready(on_ready, user_data);
                     }
                     else if (!strcmp(type, "GUILD_CREATE")) {
+//                        printf("%s\n", raw);
                         guild_t *guild = parse_guild(json_object_get_wrapping_value(data_object));
-                        put_list(ws_payload->yadl_context->guilds, guild->id, guild);
+                        put_list(YADL_OBJECT_GUILD, ws_payload->yadl_context->guilds, guild->id, guild);
 
                         struct yadl_event_on_guild_create *on_guild_create = yadl_malloc(sizeof(struct yadl_event_on_guild_create));
                         on_guild_create->guild = guild;
