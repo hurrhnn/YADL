@@ -23,8 +23,11 @@
 
 void on_ready(const struct yadl_event_on_ready *event, void* user_data) {
     printf("YADL v%s Library Test Started.\n\n", YADL_VERSION);
+    yadl_get_self_user(event->context);
+    user_t *bot_admin = yadl_get_user(event->context, "345473282654470146");
 
     puts("===== On Ready =====");
+    printf("Bot Admin: %s#%s\n", bot_admin->username, bot_admin->discriminator);
     printf("Gateway Version: %d\n", event->gateway_version);
     printf("ID: %s\n", event->self_user->id);
     printf("Name: %s#%s\n", event->self_user->username, event->self_user->discriminator);
@@ -34,6 +37,7 @@ void on_ready(const struct yadl_event_on_ready *event, void* user_data) {
 
 void on_guild_create(const struct yadl_event_on_guild_create *event, void *user_data) {
     printf("Guild Created: %s\n", event->guild->name);
+//    printf("Guild Members: %s\n", event->guild->members);
 }
 
 int main(__attribute__((unused)) int argc, char **argv) {
@@ -48,8 +52,8 @@ int main(__attribute__((unused)) int argc, char **argv) {
     memcpy(yadl_context.info.TOKEN, token_env, strlen(token_env));
 
     yadl_gateway_intents gateway_intents = { .value = YADL_GATEWAY_INTENTS_ALL };
-    gateway_intents.flags.GUILD_MEMBERS = false;
-    gateway_intents.flags.GUILD_PRESENCES = false;
+//    gateway_intents.flags.GUILD_MEMBERS = false;
+//    gateway_intents.flags.GUILD_PRESENCES = false;
 
     yadl_context.info.GATEWAY_INTENTS = gateway_intents.value;
     yadl_context.callbacks.on_ready = on_ready;
