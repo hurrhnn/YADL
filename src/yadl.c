@@ -34,7 +34,7 @@ void yadl_init(yadl_context_t *yadl_context) {
     sprintf(yadl_info->GATEWAY_PATH, YADL_GATEWAY_PATH, yadl_info->GATEWAY_VER);
     sprintf(yadl_info->VOICE_PATH, YADL_VOICE_PATH, yadl_info->VOICE_VER);
     sprintf(yadl_info->USER_AGENT, YADL_USER_AGENT);
-    sprintf(yadl_info->APPLICATION, YADL_APPLICATION);
+    sprintf(yadl_info->APPLICATION, "%s v%s", YADL_APPLICATION, YADL_VERSION);
 
     yadl_gc_init();
 }
