@@ -18,16 +18,16 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef YADL_GET_CURRENT_USER_H
-#define YADL_GET_CURRENT_USER_H
+#ifndef YADL_RETRIEVE_SELF_USER_H
+#define YADL_RETRIEVE_SELF_USER_H
 
 #include "../utils/utils.h"
 #include "../http/http_request.h"
 #include "../impl/impl.h"
 #include "../yadl.h"
 
-#define YADL_GET_CURRENT_USER_PATH "/users/@me"
+#define YADL_RETRIEVE_CURRENT_USER_PATH "/users/@me"
 
-self_user_t *yadl_get_self_user(yadl_context_t *context);
+self_user_t *yadl_retrieve_self_user(yadl_context_t *context);
 
-#endif //YADL_GET_CURRENT_USER_H
+#endif //YADL_RETRIEVE_SELF_USER_H

@@ -18,15 +18,15 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "get_current_user.h"
+#include "retrieve_self_user.h"
 
-self_user_t *yadl_get_self_user(yadl_context_t *context) {
-    char *get_self_user = yadl_malloc(YADL_MIDIUM_SIZE),
+self_user_t *yadl_retrieve_self_user(yadl_context_t *context) {
+    char *retrieve_self_user = yadl_malloc(YADL_MIDIUM_SIZE),
             *authorization_header = yadl_malloc(YADL_MIDIUM_SIZE);
-    snprintf(get_self_user, YADL_MIDIUM_SIZE, "%s", yadl_strcat(context->info.API_URL, YADL_GET_CURRENT_USER_PATH));
+    snprintf(retrieve_self_user, YADL_MIDIUM_SIZE, "%s", yadl_strcat(context->info.API_URL, YADL_RETRIEVE_CURRENT_USER_PATH));
 
     snprintf(authorization_header, YADL_MIDIUM_SIZE, context->info.AUTHORIZATION_HEADER, context->info.TOKEN);
-    struct http_result *result = http_request("GET", get_self_user, authorization_header, NULL,context->info.APPLICATION, NULL);
+    http_result_t *result = http_request("GET", retrieve_self_user, authorization_header, NULL,context->info.APPLICATION, NULL, 0);
 
     if(result->response_code != 200) {
         self_user_t *self_user = yadl_malloc(sizeof(self_user_t));
