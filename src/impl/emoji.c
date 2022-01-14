@@ -22,12 +22,12 @@
 
 emoji_t *parse_emoji(JSON_Value *emoji_value) {
     JSON_Object *emoji = json_object(emoji_value);
-    emoji_t *result = yadl_malloc(sizeof(emoji_t), true);
+    emoji_t *result = yadl_malloc(sizeof(emoji_t));
 
     *result = (emoji_t) {(char *) json_object_get_string(emoji, "id"),
                          (char *) json_object_get_string(emoji, "name"),
                          (char *) json_serialize_to_string_pretty(json_array_get_wrapping_value(json_object_get_array(emoji, "roles"))),
-                         (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(emoji, "user"))),
+                         parse_user(json_object_get_wrapping_value(json_object_get_object(emoji, "user"))),
                          yadl_json_boolean_null_check(json_object_get_boolean(emoji, "require_colons")),
                          yadl_json_boolean_null_check(json_object_get_boolean(emoji, "managed")),
                          yadl_json_boolean_null_check(json_object_get_boolean(emoji, "animated")),
@@ -35,4 +35,19 @@ emoji_t *parse_emoji(JSON_Value *emoji_value) {
     };
 
     return result;
+}
+
+JSON_Value *struct_emoji(emoji_t *emoji) {
+    JSON_Object *result = yadl_json_object_builder(NULL);
+
+    json_object_set_string(result, "id", emoji->id);
+    json_object_set_string(result, "name", emoji->name);
+    json_object_set_string(result, "roles", emoji->roles);
+    json_object_set_value(result, "user", struct_user(emoji->user));
+    json_object_set_boolean(result, "require_colons", emoji->require_colons);
+    json_object_set_boolean(result, "managed", emoji->managed);
+    json_object_set_boolean(result, "animated", emoji->animated);
+    json_object_set_boolean(result, "available", emoji->available);
+
+    return json_object_get_wrapping_value(result);
 }

@@ -22,16 +22,17 @@
 #define YADL_EMOJI_H
 
 #include <stdbool.h>
-#include "parson.h"
+#include <parson.h>
 #include "../utils/utils.h"
 #include "../json/json.h"
+#include "user.h"
 
 typedef struct __attribute__((__packed__)) {
     char *id;
     char *name;
     char *roles;
     /* array of role object ids */
-    char *user;
+    user_t *user;
     /* user object */
     bool require_colons;
     bool managed;
@@ -41,5 +42,7 @@ typedef struct __attribute__((__packed__)) {
 } emoji_t;
 
 emoji_t *parse_emoji(JSON_Value *emoji_value);
+
+JSON_Value *struct_emoji(emoji_t *emoji);
 
 #endif //YADL_EMOJI_H
