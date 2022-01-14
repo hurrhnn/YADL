@@ -28,7 +28,7 @@ const lws_retry_bo_t http_retry = {
 int callback_http(struct lws *wsi, enum lws_callback_reasons reason,
                   void *user, void *in, size_t len) {
     yadl_pthread_append(pthread_self());
-    struct http_payload *http_payload = lws_context_user(lws_get_context((wsi)));
+    http_payload_t *http_payload = lws_context_user(lws_get_context((wsi)));
     switch (reason) {
         case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
             lwsl_err("Client Connection Error: %s\n",
@@ -69,21 +69,39 @@ int callback_http(struct lws *wsi, enum lws_callback_reasons reason,
                 }
             }
 
+            bool is_set_content_type = false;
             if (http_payload->header_len > 0) {
-                char *auth_pos = strstr(http_payload->header, "Authorization: ");
-                size_t offset = strlen("Authorization: ");
-                if (auth_pos) {
-                    size_t auth_len = strlen(auth_pos + offset);
-                    if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION,
-                                                     (const unsigned char *) auth_pos + offset,
-                                                     (int) auth_len, p, end)) {
-                        *http_payload->response_code = 0;
-                        return -1;
+                char *headers = strtok(http_payload->header, "\n");
+                while (headers != NULL) {
+                    char *authorization_pos = strstr(headers, "Authorization: ");
+                    char *content_type_pos = strstr(headers, "Content-Type: ");
+
+                    if (authorization_pos != NULL) {
+                        size_t offset = strlen("Authorization: ");
+                        size_t auth_len = strlen(authorization_pos + offset);
+                        if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_AUTHORIZATION,
+                                                         (const unsigned char *) authorization_pos + offset,
+                                                         (int) auth_len, p, end)) {
+                            *http_payload->response_code = 0;
+                            return -1;
+                        }
+
+                    } else if (content_type_pos != NULL) {
+                        size_t offset = strlen("Content-Type: ");
+                        size_t auth_len = strlen(content_type_pos + offset);
+                        if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
+                                                         (const unsigned char *) content_type_pos + offset,
+                                                         (int) auth_len, p, end)) {
+                            *http_payload->response_code = 0;
+                            return -1;
+                        }
+                        is_set_content_type = true;
                     }
+                    headers = strtok(NULL, "\n");
                 }
             }
 
-            if (http_payload->request_body_len > 0) {
+            if(!is_set_content_type) {
                 char content_type[] = "application/json; charset=utf-8";
                 if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
                                                  (unsigned char *) content_type,
@@ -91,7 +109,9 @@ int callback_http(struct lws *wsi, enum lws_callback_reasons reason,
                     *http_payload->response_code = 0;
                     return -1;
                 }
+            }
 
+            if (http_payload->request_body_len > 0) {
                 char *body_len_str = yadl_malloc(YADL_SMALL_SIZE);
                 snprintf(body_len_str, YADL_SMALL_SIZE, "%zu", http_payload->request_body_len);
                 if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_CONTENT_LENGTH,
@@ -101,12 +121,16 @@ int callback_http(struct lws *wsi, enum lws_callback_reasons reason,
                     return -1;
                 }
 
-                size_t request_body_size = http_payload->request_body_len + 2;
-                char *request_body = yadl_malloc(request_body_size);
-                snprintf(request_body, request_body_size, "\n%s", *http_payload->request_body);
-                memcpy((char *) *p, request_body, request_body_size);
-                *p += request_body_size;
+                lws_client_http_body_pending(wsi, 1);
+                lws_callback_on_writable(wsi);
             }
+            break;
+        }
+
+        case LWS_CALLBACK_CLIENT_HTTP_WRITEABLE: {
+            lws_write_http(wsi, *http_payload->request_body, http_payload->request_body_len);
+            lws_client_http_body_pending(wsi, 0);
+            break;
         }
 
         case LWS_CALLBACK_RECEIVE_CLIENT_HTTP_READ: {
@@ -118,7 +142,7 @@ int callback_http(struct lws *wsi, enum lws_callback_reasons reason,
                 if (http_payload->response_body_len >= http_payload->current_response_len) {
                     http_payload->current_response_len += YADL_LARGE_SIZE;
                     *http_payload->response_body = yadl_realloc(*http_payload->response_body,
-                                                           http_payload->current_response_len);
+                                                                http_payload->current_response_len);
                 }
                 memcpy(*http_payload->response_body + before_data_len, in, len);
                 break;
@@ -152,7 +176,7 @@ const struct lws_protocols protocols[] = {
         {
                 "http",
                 callback_http,
-                sizeof(struct http_payload), 0, 0, NULL, 0
+                sizeof(http_payload_t), 0, 0, NULL, 0
         },
         LWS_PROTOCOL_LIST_TERM
 };
@@ -170,7 +194,7 @@ int notify_callback(lws_state_manager_t *mgr, __attribute__((unused)) lws_state_
     i.context = context;
     i.ssl_connection = LCCSCF_USE_SSL;
     i.port = 443;
-    i.address = ((struct http_payload *) (lws_context_user(context)))->address;
+    i.address = ((http_payload_t *) (lws_context_user(context)))->address;
 
     i.ssl_connection |= LCCSCF_H2_QUIRK_OVERFLOWS_TXCR |
                         LCCSCF_ACCEPT_TLS_DOWNGRADE_REDIRECTS |
@@ -179,41 +203,45 @@ int notify_callback(lws_state_manager_t *mgr, __attribute__((unused)) lws_state_
     i.alpn = "http/1.1";
     i.ssl_connection |= LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
     i.retry_and_idle_policy = &http_retry;
-    i.path = ((struct http_payload *) (lws_context_user(context)))->path;
+    i.path = ((http_payload_t *) (lws_context_user(context)))->path;
 
     i.host = i.address;
     i.origin = i.address;
-    i.method = ((struct http_payload *) (lws_context_user(context)))->method;
+    i.method = ((http_payload_t *) (lws_context_user(context)))->method;
 
     i.protocol = protocols[0].name;
-    i.pwsi = &((struct http_payload *) (lws_context_user(context)))->client_wsi;
+    i.pwsi = &((http_payload_t *) (lws_context_user(context)))->client_wsi;
 
     if (!lws_client_connect_via_info(&i)) {
         lwsl_err("Request creation failed..\n");
-        *((struct http_payload *) (lws_context_user(context)))->response_code = 0;
-        ((struct http_payload *) (lws_context_user(context)))->status = 1;
+        *((http_payload_t *) (lws_context_user(context)))->response_code = 0;
+        ((http_payload_t *) (lws_context_user(context)))->status = 1;
         lws_cancel_service(context);
-        return 1;
+        return -1;
     }
-
     return 0;
 }
 
-
-struct http_result *
-http_request(const char *method, const char *URL, char *header, char *cookie, const char *user_agent, char **request_body) {
+http_result_t *
+http_request(const char *method, const char *URL, char *header, char *cookie, const char *user_agent, char **request_body, size_t request_body_size) {
     yadl_pthread_append(pthread_self());
-    struct lws *client_wsi = yadl_malloc(sizeof(void *));
-    struct http_payload *http_payload = yadl_malloc(sizeof(struct http_payload));
-    struct http_result *http_result = yadl_malloc(sizeof(struct http_result));
+
     struct lws_context *context;
     struct lws_context_creation_info info;
+    struct lws *client_wsi = yadl_malloc(sizeof(void *));
+
+    lws_state_notify_link_t notifier = {{NULL, NULL, NULL}, notify_callback, ""};
+    lws_state_notify_link_t *na[] = {&notifier, NULL};
+
+    http_payload_t *http_payload = yadl_malloc(sizeof(http_payload_t));
+    http_result_t *http_result = yadl_malloc(sizeof(http_result_t));
 
     memset(&info, 0, sizeof info);
-    memset(http_payload, 0, sizeof(struct http_payload));
+    memset(http_payload, 0, sizeof(http_payload_t));
 
     char **response_body = yadl_malloc(sizeof(void *));
     *response_body = yadl_malloc(YADL_LARGE_SIZE, true);
+
     http_result->response_body = response_body;
     http_result->response_code = -1;
 
@@ -226,14 +254,11 @@ http_request(const char *method, const char *URL, char *header, char *cookie, co
     http_payload->cookie = cookie;
     http_payload->user_agent = (char *) user_agent;
 
-    lws_state_notify_link_t notifier = {{NULL, NULL, NULL}, notify_callback, ""};
-    lws_state_notify_link_t *na[] = {&notifier, NULL};
-
     http_payload->client_wsi = client_wsi;
     http_payload->status = false;
     http_payload->data_ready = false;
     http_payload->request_body = request_body;
-    http_payload->request_body_len = http_payload->request_body == NULL ? 0 : strlen(*http_payload->request_body);
+    http_payload->request_body_len = http_payload->request_body == NULL ? 0 : request_body_size;
     http_payload->response_body = http_result->response_body;
     http_payload->response_body_len = 0;
     http_payload->current_response_len = YADL_LARGE_SIZE;
@@ -242,30 +267,36 @@ http_request(const char *method, const char *URL, char *header, char *cookie, co
     http_payload->header_len = http_payload->header == NULL ? 0 : strlen(http_payload->header);
     http_payload->cookie_len = http_payload->cookie == NULL ? 0 : strlen(http_payload->cookie);
 
+    info.timeout_secs = 10;
+    info.connect_timeout_secs = 10;
     info.options = LWS_SERVER_OPTION_DO_SSL_GLOBAL_INIT |
                    LWS_SERVER_OPTION_H2_JUST_FIX_WINDOW_UPDATE_OVERFLOW;
     info.port = CONTEXT_PORT_NO_LISTEN;
 
     info.protocols = protocols;
     info.register_notifier_list = na;
-    info.connect_timeout_secs = 1;
+
     info.user = http_payload;
+    info.pt_serv_buf_size = http_payload->request_body_len + (YADL_LARGE_SIZE * 2);
 
     info.fd_limit_per_thread = 3;
     context = lws_create_context(&info);
 
     if (!context) {
         lwsl_err("lws init failed..\n");
-        return false;
+        return NULL;
     }
 
     int n = 0;
     while (n >= 0 && !http_payload->status)
         n = lws_service(context, 0);
 
-    lwsl_user("%s %s/%s %u\n", http_payload->method, http_payload->address, http_payload->path,
-              *http_payload->response_code);
+    lwsl_user("%s %s/%s %u\n", http_payload->method, http_payload->address, http_payload->path, *http_payload->response_code);
     lwsl_hexdump_level(LLL_USER, *http_payload->response_body, http_payload->response_body_len);
+
+    if(*http_payload->response_code / 100 != 2)
+        lwsl_warn("%s %s/%s %u, \n%s", http_payload->method, http_payload->address, http_payload->path, *http_payload->response_code, *http_payload->response_body);
+
     lws_context_destroy(context);
     return http_result;
 }
