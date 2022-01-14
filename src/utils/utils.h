@@ -26,7 +26,6 @@
 #include <libwebsockets.h>
 
 #include "info.h"
-#include "../gc/gc.h"
 
 #define YADL_SMALL_SIZE  0x10
 #define YADL_MIDIUM_SIZE 0x100
@@ -57,5 +56,11 @@ char *yadl_strcat(const char *str1, const char *str2);
 void *yadl_malloc(size_t length, ...);
 
 void *yadl_realloc(void *address, size_t length);
+
+void yadl_free(void* address, ...);
+
+size_t yadl_get_file_size(FILE* fp);
+
+char* yadl_get_file_name_from_path(char* path);
 
 #endif //YADL_STRINGS_H

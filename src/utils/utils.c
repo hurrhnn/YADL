@@ -19,6 +19,7 @@
 */
 
 #include "utils.h"
+#include "../gc/gc.h"
 
 char *yadl_strrem(const char *str, const char *sub) {
     char *copy_str = yadl_malloc(strlen(str));
@@ -65,4 +66,36 @@ void *yadl_realloc(void *address, size_t length) {
         yadl_gc_append(new_address, YADL_GC_NODE_ADDRESS);
     }
     return new_address;
+}
+
+void yadl_free(void* address, ...) {
+    int8_t selected_node = YADL_GC_NODE_ADDRESS;
+    va_list ap;
+
+    va_start(ap, address);
+    if(va_arg(ap, size_t) == true)
+        selected_node = (int8_t) YADL_NON_GC_NODE;
+
+    delete_node(yadl_gc_get_context(selected_node), address, selected_node);
+    va_end(ap);
+}
+
+size_t yadl_get_file_size(FILE* fp) {
+    fseek(fp, 0L, SEEK_END);
+    size_t file_size = ftell(fp);
+    rewind(fp);
+
+    return file_size;
+}
+
+char* yadl_get_file_name_from_path(char* path) {
+    char* file_name = path + strlen(path);
+    for (; file_name > path; file_name--) {
+        if ((*file_name == '\\') || (*file_name == '/')) {
+            file_name++;
+            break;
+        }
+    }
+
+    return file_name;
 }
