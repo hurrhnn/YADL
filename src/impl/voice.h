@@ -25,12 +25,13 @@
 #include "parson.h"
 #include "../utils/utils.h"
 #include "../json/json.h"
+#include "guild.h"
 
 typedef struct __attribute__((__packed__)) {
     char *guild_id;
     char *channel_id;
     char *user_id;
-    char *member;
+    guild_member_t *member;
     /* guild member object */
     char *session_id;
     bool deaf;
@@ -56,5 +57,9 @@ typedef struct __attribute__((__packed__)) {
 voice_state_t *parse_voice_state(JSON_Value *voice_state_value);
 
 voice_region_t *parse_voice_region(JSON_Value *voice_region_value);
+
+JSON_Value *struct_voice_region(voice_region_t *voice_region);
+
+JSON_Value *struct_voice_state(voice_state_t *voice_state);
 
 #endif //YADL_VOICE_H
