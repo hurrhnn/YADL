@@ -22,29 +22,41 @@
 #define YADL_INVITE_H
 
 #include <stdbool.h>
-#include "parson.h"
+#include <parson.h>
 #include "../utils/utils.h"
 #include "../json/json.h"
+#include "guild.h"
+#include "channel.h"
+#include "application.h"
+
+typedef struct __attribute__((__packed__)) {
+    char *members;
+    /* array of partial guild member objects */
+    int participant_count;
+    int speaker_count;
+    char *topic;
+
+} invite_stage_instance_t;
 
 typedef struct __attribute__((__packed__)) {
     char *code;
-    char *guild;
+    guild_t *guild;
     /* partial guild object */
-    char *channel;
+    channel_t *channel;
     /* partial channel object */
-    char *inviter;
+    user_t *inviter;
     /* user object */
     int target_type;
-    char *target_user;
+    user_t *target_user;
     /* user object */
-    char *target_application;
+    application_t *target_application;
     /* partial application object */
     int approximate_presence_count;
     int approximate_member_count;
     char *expires_at;
-    char *stage_instance;
+    invite_stage_instance_t *stage_instance;
     /* invite stage instance object */
-    char *guild_scheduled_event;
+    guild_scheduled_event_t *guild_scheduled_event;
     /* guild scheduled event object */
 
 } invite_t;
@@ -57,15 +69,6 @@ typedef struct __attribute__((__packed__)) {
     char *created_at;
 
 } invite_metadata_t;
-
-typedef struct __attribute__((__packed__)) {
-    char *members;
-    /* array of partial guild member objects */
-    int participant_count;
-    int speaker_count;
-    char *topic;
-
-} invite_stage_instance_t;
 
 typedef struct __attribute__((__packed__)) {
     char *id;
@@ -84,5 +87,13 @@ invite_metadata_t *parse_invite_metadata(JSON_Value *invite_metadata_value);
 invite_stage_instance_t *parse_invite_stage_instance(JSON_Value *invite_stage_instance_value);
 
 stage_instance_t *parse_stage_instance(JSON_Value *stage_instance_value);
+
+JSON_Value *struct_stage_instance(stage_instance_t *stage_instance);
+
+JSON_Value *struct_invite_stage_instance(invite_stage_instance_t *invite_stage_instance);
+
+JSON_Value *struct_invite_metadata(invite_metadata_t *invite_metadata);
+
+JSON_Value *struct_invite(invite_t *invite);
 
 #endif //YADL_INVITE_H
