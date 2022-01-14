@@ -25,7 +25,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-struct http_payload {
+typedef struct {
     struct lws *client_wsi;
     bool status;
 
@@ -46,6 +46,6 @@ struct http_payload {
     char *cookie;
     char **request_body;
     char **response_body;
-};
+} http_payload_t;
 
 #endif

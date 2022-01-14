@@ -23,9 +23,9 @@
 
 #include "libwebsockets.h"
 
-struct http_result {
+typedef struct {
     u_int32_t response_code;
     char **response_body;
-};
+} http_result_t;
 
 #endif //YADL_HTTP_RESULT_H

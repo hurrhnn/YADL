@@ -21,11 +21,13 @@
 #ifndef YADL_HTTP_REQUEST_H
 #define YADL_HTTP_REQUEST_H
 
+#include <libwebsockets.h>
 #include "http_payload.h"
 #include "http_result.h"
+#include "../gc/pthread.h"
 #include "../gc/gc.h"
 
-struct http_result *
-http_request(const char *method, const char *URL, char *header, char *cookie, const char *user_agent, char **request_body);
+http_result_t *
+http_request(const char *method, const char *URL, char *header, char *cookie, const char *user_agent, char **request_body, size_t request_body_size);
 
 #endif
