@@ -25,29 +25,31 @@
 #include "parson.h"
 #include "../utils/utils.h"
 
+typedef struct yadl_object_array yadl_object_array_t;
+
 typedef struct __attribute__((__packed__)) {
-    char *audit_log_entries;
+    yadl_object_array_t *audit_log_entries;
     /* array of audit log entry objects */
-    char *guild_scheduled_events;
+    yadl_object_array_t *guild_scheduled_events;
     /* array of guild scheduled event objects */
-    char *integrations;
+    yadl_object_array_t *integrations;
     /* array of partial integration objects */
-    char *threads;
+    yadl_object_array_t *threads;
     /* array of channel objects */
-    char *users;
+    yadl_object_array_t *users;
     /* array of user objects */
-    char *webhooks;
+    yadl_object_array_t *webhooks;
     /* array of webhook objects */
 
 } audit_log_t;
 
 typedef struct __attribute__((__packed__)) {
     char *target_id;
-    char *changes;
+    yadl_object_array_t *changes;
     /* array of audit log change objects */
     char *user_id;
     char *id;
-    char *action_type;
+    int action_type;
     /* audit log event */
     char *options;
     /* optional audit entry info */
@@ -56,10 +58,23 @@ typedef struct __attribute__((__packed__)) {
 } audit_log_entry_t;
 
 typedef struct __attribute__((__packed__)) {
+    char *new_value;
     char *old_value;
     /* mixed */
     char *key;
 
 } audit_log_change_t;
+
+audit_log_t *parse_audit_log(JSON_Value *audit_log_value);
+
+audit_log_entry_t *parse_audit_log_entry(JSON_Value *audit_log_entry_value);
+
+audit_log_change_t *parse_audit_log_change(JSON_Value *audit_log_change_value);
+
+JSON_Value *struct_audit_log_change(audit_log_change_t *audit_log_change);
+
+JSON_Value *struct_audit_log_entry(audit_log_entry_t *audit_log_entry);
+
+JSON_Value *struct_audit_log(audit_log_t *audit_log);
 
 #endif //YADL_AUDIT_LOG_H
