@@ -26,29 +26,7 @@
 #include "parson.h"
 #include "../json/json.h"
 
-typedef struct __attribute__((__packed__)) {
-    char *title;
-    char *type;
-    char *description;
-    char *url;
-    char *timestamp;
-    int color;
-    char *footer;
-    /* embed footer object */
-    char *image;
-    /* embed image object */
-    char *thumbnail;
-    /* embed thumbnail object */
-    char *video;
-    /* embed video object */
-    char *provider;
-    /* embed provider object */
-    char *author;
-    /* embed author object */
-    char *fields;
-    /* array of embed field objects */
-
-} embed_t;
+typedef struct yadl_object_array yadl_object_array_t;
 
 typedef struct __attribute__((__packed__)) {
     char *url;
@@ -102,6 +80,30 @@ typedef struct __attribute__((__packed__)) {
 
 } embed_field_t;
 
+typedef struct __attribute__((__packed__)) {
+    char *title;
+    char *type;
+    char *description;
+    char *url;
+    char *timestamp;
+    int color;
+    embed_footer_t *footer;
+    /* embed footer object */
+    embed_image_t *image;
+    /* embed image object */
+    embed_thumbnail_t *thumbnail;
+    /* embed thumbnail object */
+    embed_video_t *video;
+    /* embed video object */
+    embed_provider_t *provider;
+    /* embed provider object */
+    embed_author_t *author;
+    /* embed author object */
+    yadl_object_array_t *fields;
+    /* array of embed field objects */
+
+} embed_t;
+
 embed_t *parse_embed(JSON_Value *embed_value);
 
 embed_thumbnail_t *parse_embed_thumbnail(JSON_Value *embed_thumbnail_value);
@@ -117,5 +119,21 @@ embed_author_t *parse_embed_author(JSON_Value *embed_author_value);
 embed_footer_t *parse_embed_footer(JSON_Value *embed_footer_value);
 
 embed_field_t *parse_embed_field(JSON_Value *embed_field_value);
+
+JSON_Value *struct_embed_field(embed_field_t *embed_field);
+
+JSON_Value *struct_embed_footer(embed_footer_t *embed_footer);
+
+JSON_Value *struct_embed_author(embed_author_t *embed_author);
+
+JSON_Value *struct_embed_provider(embed_provider_t *embed_provider);
+
+JSON_Value *struct_embed_image(embed_image_t *embed_image);
+
+JSON_Value *struct_embed_video(embed_video_t *embed_video);
+
+JSON_Value *struct_embed_thumbnail(embed_thumbnail_t *embed_thumbnail);
+
+JSON_Value *struct_embed(embed_t *embed);
 
 #endif //YADL_EMBED_H
