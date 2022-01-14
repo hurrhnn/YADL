@@ -32,7 +32,6 @@ void yadl_create_message(yadl_context_t *context, const char *channel_id, const 
     snprintf(headers, YADL_MIDIUM_SIZE, context->info.AUTHORIZATION_HEADER, context->info.TOKEN);
 
     JSON_Object *json_payload = yadl_json_object_builder(NULL);
-
     if (content != NULL)
         json_object_dotset_string(json_payload, "content", content);
 
@@ -52,7 +51,7 @@ void yadl_create_message(yadl_context_t *context, const char *channel_id, const 
         json_object_dotset_value(json_payload, "message_reference", struct_message_reference(message_reference));
 
     if (attachments != NULL) {
-        *payload = yadl_malloc(YADL_CREATE_MESSAGE_LIMIT_ATTACHMENT_SIZE * attachments->size);
+        *payload = yadl_malloc((YADL_LARGE_SIZE * 2) + YADL_CREATE_MESSAGE_LIMIT_ATTACHMENT_SIZE * attachments->size);
         headers = yadl_strcat(headers, "\nContent-Type: multipart/form-data; boundary=boundary");
 
         JSON_Array *json_attachments = yadl_json_array_builder(NULL);
@@ -65,10 +64,6 @@ void yadl_create_message(yadl_context_t *context, const char *channel_id, const 
             json_array_append_value(json_attachments, struct_attachment(attachment));
         }
         json_object_dotset_value(json_payload, "attachments", json_array_get_wrapping_value(json_attachments));
-
-        *payload = yadl_realloc(*payload,
-                                YADL_CREATE_MESSAGE_LIMIT_ATTACHMENT_SIZE * attachments->size +
-                                strlen(json_serialize_to_string_pretty(json_object_get_wrapping_value(json_payload))));
 
         size_t current_length = 0;
         current_length += sprintf(*payload + current_length, "--boundary\n"

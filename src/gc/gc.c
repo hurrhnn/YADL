@@ -57,7 +57,6 @@ void yadl_gc_set_alive(bool alive) {
 
 void yadl_gc_append(void *address, int8_t node) {
     void *selected_node = yadl_gc_get_context(node);
-    if(node == YADL_GC_NODE_PTHREAD)
     if (search_node(selected_node, address, node) == NULL) {
         insert_node(selected_node, address);
     }
@@ -65,7 +64,7 @@ void yadl_gc_append(void *address, int8_t node) {
 
 void *yadl_gc_loop() {
     while (yadl_gc_context_t.gc_alive) {
-        sleep(1);
+        sleep(10);
         scan_node(yadl_gc_context_t.pthread_node, yadl_gc_context_t.address_node,
                   YADL_GC_NODE_PTHREAD); // mark
 

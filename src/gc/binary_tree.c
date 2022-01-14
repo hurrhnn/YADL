@@ -61,7 +61,10 @@ u_int8_t delete_node(gc_node_t *gc_node, void *address, int8_t node) {
     gc_node_t *entry = NULL, **prev_pos = NULL, *target = NULL;
     entry = search_node(gc_node, address, node);
 
-    if (entry == NULL) return 1;
+    if (entry == NULL) {
+        pthread_mutex_unlock(&node_mutex);
+        return 1;
+    }
 
     if (entry->parent->left == entry) prev_pos = &entry->parent->left;
     else prev_pos = &entry->parent->right;
@@ -171,7 +174,7 @@ void scan_node(gc_node_t *main_node, gc_node_t *sub_node, int8_t node) {
                  i >= pthread_stack - pthread_stack_size; i -= sizeof(void *)) {
                 gc_node_t *address_node = search_node(sub_node, *(void **) i, YADL_GC_NODE_ADDRESS);
                 if (i != NULL && *(void **) i != NULL && address_node != NULL && *(void **) i == address_node->address)
-                        address_node->mark = true;
+                    address_node->mark = true;
 #endif
             }
         }
@@ -179,8 +182,6 @@ void scan_node(gc_node_t *main_node, gc_node_t *sub_node, int8_t node) {
         if (main_node->address != NULL) {
             if (!main_node->mark) {
                 delete_node(main_node, main_node->address, node);
-                free(main_node->address);
-                main_node->address = 0x0;
             } else
                 main_node->mark = (int8_t) (main_node->mark == -1 ? main_node->mark : false);
         }

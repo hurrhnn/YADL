@@ -426,7 +426,6 @@ int start_main_client(yadl_context_t *yadl_context) {
     yadl_gc_set_alive(false);
 
     inflateEnd(inflate_stream);
-    printf("AA");
     pthread_join(*((yadl_pthread_context_t *) ((gc_node_t *) yadl_gc_get_context(
             YADL_GC_NODE_PTHREAD))->address)->pthread, NULL);
     return 0;
