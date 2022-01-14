@@ -25,6 +25,7 @@
 */
 
 #include "binary_tree.h"
+#include "../gc/gc.h"
 
 #if __linux__
 pthread_mutex_t node_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;
@@ -169,10 +170,8 @@ void scan_node(gc_node_t *main_node, gc_node_t *sub_node, int8_t node) {
             for (void *i = pthread_stack - sizeof(void *);
                  i >= pthread_stack - pthread_stack_size; i -= sizeof(void *)) {
                 gc_node_t *address_node = search_node(sub_node, *(void **) i, YADL_GC_NODE_ADDRESS);
-                if (i != NULL && *(void **) i != NULL && address_node != NULL) {
-                    if (*(void **) i == address_node->address)
+                if (i != NULL && *(void **) i != NULL && address_node != NULL && *(void **) i == address_node->address)
                         address_node->mark = true;
-                }
 #endif
             }
         }

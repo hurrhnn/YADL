@@ -29,8 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-
-#include "gc.h"
 #include "binary_tree.h"
 
 typedef struct yadl_pthread_context {
