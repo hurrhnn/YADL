@@ -19,7 +19,6 @@
 */
 
 #include "main_client.h"
-#include "../api/create_message.h"
 
 static const u_int32_t backoff_ms[] = {1000, 2000, 3000, 4000, 5000 };
 
@@ -34,9 +33,24 @@ static const lws_retry_bo_t retry = {
         .jitter_percent            = 20,
 };
 
-void connection_retry(struct lws *client_wsi, lws_sorted_usec_list_t *sul, sul_cb_t callback, u_int16_t *retry_count);
+static z_stream *inflate_stream;
+void main_websocket_init_inflate_stream() {
+    inflate_stream = yadl_malloc(sizeof(z_stream));
+    inflate_stream->zalloc = Z_NULL;
+    inflate_stream->zfree = Z_NULL;
+    inflate_stream->opaque = Z_NULL;
 
-void schedule_callback(lws_sorted_usec_list_t *sul) {
+    inflateInit(inflate_stream);
+}
+
+void main_websocket_connection_retry(struct lws *client_wsi, lws_sorted_usec_list_t *sul, sul_cb_t callback, u_int16_t *retry_count) {
+    if (lws_retry_sul_schedule_retry_wsi(client_wsi, sul, callback, retry_count)) {
+        lwsl_err("connection attempts exhausted.\n");
+        ((struct main_client_payload *) lws_context_user(lws_get_context(client_wsi)))->connection_exhausted = true;
+    }
+}
+
+void main_websocket_schedule_callback(lws_sorted_usec_list_t *sul) {
     yadl_pthread_append(pthread_self());
     struct main_client_payload *main_payload = lws_container_of(sul, struct main_client_payload, sul);
     struct lws_client_connect_info i;
@@ -53,18 +67,11 @@ void schedule_callback(lws_sorted_usec_list_t *sul) {
     i.userdata = main_payload;
 
     if (!lws_client_connect_via_info(&i))
-        lws_retry_sul_schedule(main_payload->context, 0, sul, &retry, schedule_callback,
+        lws_retry_sul_schedule(main_payload->context, 0, sul, &retry, main_websocket_schedule_callback,
                                &main_payload->retry_count);
 }
 
-void connection_retry(struct lws *client_wsi, lws_sorted_usec_list_t *sul, sul_cb_t callback, u_int16_t *retry_count) {
-    if (lws_retry_sul_schedule_retry_wsi(client_wsi, sul, callback, retry_count)) {
-        lwsl_err("connection attempts exhausted.\n");
-        ((struct main_client_payload *) lws_context_user(lws_get_context(client_wsi)))->connection_exhausted = true;
-    }
-}
-
-void main_client_object_init(struct main_client_payload *main_client_payload) {
+void main_websocket_object_init(struct main_client_payload *main_client_payload) {
     if (main_client_payload->client_object == NULL) {
         main_client_payload->client_object = yadl_malloc(sizeof(struct main_client_object), true);
         *main_client_payload->client_object = (struct main_client_object) {yadl_malloc(sizeof(size_t), true),
@@ -82,7 +89,7 @@ void main_client_object_init(struct main_client_payload *main_client_payload) {
     }
 }
 
-void main_client_wait_signal(pthread_mutex_t *pthread_mutex, pthread_cond_t *pthread_cond, struct timespec *timespec) {
+void main_websocket_wait_signal(pthread_mutex_t *pthread_mutex, pthread_cond_t *pthread_cond, struct timespec *timespec) {
     if (timespec == NULL) {
         pthread_mutex_lock(pthread_mutex);
         pthread_cond_wait(pthread_cond, pthread_mutex);
@@ -94,7 +101,7 @@ void main_client_wait_signal(pthread_mutex_t *pthread_mutex, pthread_cond_t *pth
     }
 }
 
-void *main_send_heartbeat(void *ws_payload) {
+void *main_websocket_send_heartbeat(void *ws_payload) {
     struct main_client_payload *p_ws_payload = ws_payload;
     struct timeval tv;
     struct timespec ts;
@@ -111,10 +118,27 @@ void *main_send_heartbeat(void *ws_payload) {
         ts.tv_sec = tv.tv_sec + future_us / 1000000;
 
         pthread_cond_signal(p_ws_payload->client_object->main_client_cond);
-        main_client_wait_signal(p_ws_payload->client_object->main_heartbeat_mutex,
-                                p_ws_payload->client_object->main_heartbeat_cond, &ts);
+        main_websocket_wait_signal(p_ws_payload->client_object->main_heartbeat_mutex,
+                                   p_ws_payload->client_object->main_heartbeat_cond, &ts);
     }
     return NULL;
+}
+
+Bytef *main_websocket_uncompress(Bytef *in, uLongf *len) {
+    if(memcmp(in + *len - 0x04, YADL_MAIN_CLIENT_ZLIB_SUFFIX, 0x04) != 0)
+        return NULL;
+
+    uLongf uncompress_size = *len * 1000;
+    Bytef *uncompress_in = yadl_malloc(uncompress_size);
+
+    inflate_stream->avail_in = *len;
+    inflate_stream->next_in = in;
+    inflate_stream->avail_out = uncompress_size;
+    inflate_stream->next_out = uncompress_in;
+        inflate(inflate_stream, Z_FULL_FLUSH);
+
+    *len = uncompress_size;
+    return uncompress_in;
 }
 
 int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
@@ -122,30 +146,34 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
     yadl_pthread_append(pthread_self());
     struct main_client_payload *ws_payload = lws_context_user(lws_get_context((wsi)));
     ws_payload->client_wsi = wsi;
-    yadl_context_t *yadl_context = ws_payload->yadl_context;
+    yadl_context_t *context = ws_payload->yadl_context;
 
     switch (reason) {
         case LWS_CALLBACK_WSI_CREATE: {
-            main_client_object_init(ws_payload);
+            main_websocket_init_inflate_stream();
+            main_websocket_object_init(ws_payload);
             break;
         }
 
         case LWS_CALLBACK_CLIENT_CONNECTION_ERROR: {
             lwsl_err("CLIENT_CONNECTION_ERROR: %s\n",
                      in ? (char *) in : "(null)");
-            connection_retry(wsi, &ws_payload->sul, schedule_callback, &ws_payload->retry_count);
+            main_websocket_connection_retry(wsi, &ws_payload->sul, main_websocket_schedule_callback,
+                                            &ws_payload->retry_count);
             break;
         }
 
         case LWS_CALLBACK_CLIENT_RECEIVE: {
-//            lwsl_hexdump_level(LLL_USER, in, len);
+            Bytef *compress_data = yadl_malloc(len);
+            memcpy(compress_data, in, len);
+            if((in = main_websocket_uncompress(compress_data, &len)) == NULL)
+                break;
+
             char *raw = json_serialize_to_string_pretty(json_parse_string(in));
             if (raw == NULL)
                 break;
 
             JSON_Object *root_object = yadl_json_object_builder(raw);
-//            printf("%s\n", raw);
-
             const char *type = json_object_dotget_string(root_object, "t");
             *ws_payload->client_object->sequence = (size_t) (json_object_dotget_number(root_object, "s") == 0
                                                              ? (double) *ws_payload->client_object->sequence
@@ -153,33 +181,19 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
             u_int8_t op_code = (u_int8_t) json_object_dotget_number(root_object, "op");
             JSON_Object *data_object = json_object_dotget_object(root_object, "d");
 
-            if (ws_payload->client_object->test != NULL && strstr(raw, ws_payload->client_object->self_user->id) == NULL) {
-                char *create_message_api = yadl_malloc(YADL_MIDIUM_SIZE),
-                        *authorization_header = yadl_malloc(YADL_MIDIUM_SIZE), **payload = yadl_malloc(sizeof(char *));
-                snprintf(create_message_api, YADL_MIDIUM_SIZE,
-                         yadl_strcat(yadl_context->info.API_URL, YADL_CREATE_MESSAGE_PATH),
-                         ws_payload->client_object->test);
-                snprintf(authorization_header, YADL_MIDIUM_SIZE, yadl_context->info.AUTHORIZATION_HEADER,
-                         yadl_context->info.TOKEN);
-
-                JSON_Object *message_payload = yadl_json_object_builder(NULL);
+            if (context->user_data != NULL && !(strstr(raw, "MESSAGE_CREATE") != NULL && strstr(raw, context->self_user->id) != NULL)) {
                 char *pretty_raw = yadl_strcat(yadl_strcat("```json\n", raw), "\n```");
                 char *content = yadl_malloc(2000);
                 if (strlen(pretty_raw) >= 2000) {
                     memcpy(content, pretty_raw, 1991);
                     strcpy(content + 1991, " ...\n```");
-                    json_object_dotset_string(message_payload, "content", content);
                 } else
-                    json_object_dotset_string(message_payload, "content", pretty_raw);
-
-                *payload = json_serialize_to_string(json_object_get_wrapping_value(message_payload));
-                http_request("POST", create_message_api, authorization_header, NULL, yadl_context->info.APPLICATION,
-                             payload);
+                    content = pretty_raw;
+                yadl_create_message(context, context->user_data, content, false, NULL, NULL, NULL, NULL, NULL);
             }
 
             switch (op_code) {
                 case 0: {
-                    void *user_data = ws_payload->yadl_context->callbacks.user_data;
                     if (!strcmp(type, "READY")) {
                         ws_payload->client_object->self_user = parse_user(json_object_dotget_value(data_object, "user"));
                         ws_payload->yadl_context->self_user = ws_payload->client_object->self_user;
@@ -197,63 +211,58 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                             put_list(YADL_OBJECT_GUILD, ws_payload->yadl_context->guilds, unavailable_guild->id, unavailable_guild);
                         }
                         on_ready->context = ws_payload->yadl_context;
-                        ws_payload->yadl_context->callbacks.on_ready(on_ready, user_data);
+                        context->callbacks.on_ready(on_ready);
+//                        pthread_join(*((yadl_pthread_context_t *) yadl_pthread_create(context->callbacks.on_ready, NULL, on_ready))->pthread, NULL);
                     }
                     else if (!strcmp(type, "GUILD_CREATE")) {
-//                        printf("%s\n", raw);
                         guild_t *guild = parse_guild(json_object_get_wrapping_value(data_object));
                         put_list(YADL_OBJECT_GUILD, ws_payload->yadl_context->guilds, guild->id, guild);
+
+                        for(int i = 0; i < guild->channels->size; i++) {
+                            channel_t *channel = guild->channels->array[i];
+                            switch (channel->type) {
+                                case YADL_CHANNEL_GUILD_TEXT:
+                                    put_list(YADL_OBJECT_CHANNEL, ws_payload->yadl_context->guild_text_channels, channel->id, channel);
+                                    break;
+
+                                case YADL_CHANNEL_GUILD_VOICE:
+                                    put_list(YADL_OBJECT_CHANNEL, ws_payload->yadl_context->guild_voice_channels, channel->id, channel);
+                                    break;
+
+                                default:
+                                    break;
+                            }
+                        }
 
                         struct yadl_event_on_guild_create *on_guild_create = yadl_malloc(sizeof(struct yadl_event_on_guild_create));
                         on_guild_create->guild = guild;
                         on_guild_create->context = ws_payload->yadl_context;
-                        ws_payload->yadl_context->callbacks.on_guild_create(on_guild_create, user_data);
+                        context->callbacks.on_guild_create(on_guild_create);
                     }
                     else if (!strcmp(type, "MESSAGE_CREATE")) {
-//                        printf("%s\n", raw);
-                        // Below is the test code.
-                        if (!strcmp(json_object_dotget_string(data_object, "content"), "!!install") && !strcmp(
-                                json_object_dotget_string(data_object, "author.id"), "345473282654470146")) {
-                            ws_payload->client_object->test = malloc(YADL_MIDIUM_SIZE);
-                            memcpy(ws_payload->client_object->test,
-                                   json_object_dotget_string(data_object, "channel_id"),
-                                   strlen(json_object_dotget_string(data_object, "channel_id")));
-
-                            char *create_message_api = yadl_malloc(YADL_MIDIUM_SIZE),
-                                    *authorization_header = yadl_malloc(YADL_MIDIUM_SIZE), **payload = yadl_malloc(
-                                    sizeof(char *));
-                            snprintf(create_message_api, YADL_MIDIUM_SIZE,
-                                     yadl_strcat(yadl_context->info.API_URL, YADL_CREATE_MESSAGE_PATH),
-                                     ws_payload->client_object->test);
-                            snprintf(authorization_header, YADL_MIDIUM_SIZE, yadl_context->info.AUTHORIZATION_HEADER,
-                                     yadl_context->info.TOKEN);
-
-                            JSON_Object *message_payload = yadl_json_object_builder(NULL);
-                            json_object_dotset_string(message_payload, "content", "Successfully Installed.");
-
-                            *payload = json_serialize_to_string(json_object_get_wrapping_value(message_payload));
-                            http_request("POST", create_message_api, authorization_header, NULL,
-                                         yadl_context->info.APPLICATION, payload);
-                        } else if (!strcmp(json_object_dotget_string(data_object, "content"), "!!uninstall") && !strcmp(
-                                json_object_dotget_string(data_object, "author.id"), "345473282654470146")) {
-                            char *create_message_api = yadl_malloc(YADL_MIDIUM_SIZE),
-                                    *authorization_header = yadl_malloc(YADL_MIDIUM_SIZE), **payload = yadl_malloc(
-                                    sizeof(char *));
-                            snprintf(create_message_api, YADL_MIDIUM_SIZE,
-                                     yadl_strcat(yadl_context->info.API_URL, YADL_CREATE_MESSAGE_PATH),
-                                     ws_payload->client_object->test);
-                            snprintf(authorization_header, YADL_MIDIUM_SIZE, yadl_context->info.AUTHORIZATION_HEADER,
-                                     yadl_context->info.TOKEN);
-
-                            JSON_Object *message_payload = yadl_json_object_builder(NULL);
-                            json_object_dotset_string(message_payload, "content", "Successfully Uninstalled.");
-
-                            *payload = json_serialize_to_string(json_object_get_wrapping_value(message_payload));
-                            http_request("POST", create_message_api, authorization_header, NULL,
-                                         yadl_context->info.APPLICATION, payload);
-                            ws_payload->client_object->test = NULL;
+                        message_t *message = parse_message(json_object_get_wrapping_value(data_object));
+                        if(!message->guild_id) {
+                            struct yadl_event_on_direct_message_create *on_direct_message_create = yadl_malloc(sizeof(struct yadl_event_on_direct_message_create));
+                            on_direct_message_create->message_id = message->id;
+                            on_direct_message_create->message = message;
+                            on_direct_message_create->author = message->author;
+                            on_direct_message_create->channel = get_list(context->dm_channels, message->channel_id) == NULL ? yadl_retrieve_channel_by_id(context, message->channel_id) : get_list(context->dm_channels, message->channel_id);
+                            on_direct_message_create->context = context;
+                            context->callbacks.on_direct_message_create(on_direct_message_create);
+                        } else {
+                            struct yadl_event_on_guild_message_create *on_guild_message_create = yadl_malloc(sizeof(struct yadl_event_on_guild_message_create));
+                            on_guild_message_create->message_id = message->id;
+                            on_guild_message_create->message = message;
+                            on_guild_message_create->author = message->author;
+                            on_guild_message_create->member = message->member;
+                            on_guild_message_create->channel = get_list(context->guild_text_channels, message->channel_id);
+                            on_guild_message_create->guild = get_list(context->guilds, message->guild_id);
+                            on_guild_message_create->is_webhook_message = message->webhook_id;
+                            on_guild_message_create->context = context;
+                            context->callbacks.on_guild_message_create(on_guild_message_create);
                         }
-                    }
+                    } // else
+                      //   printf("%s\n", raw);
                     break;
                 }
                 case 9: {
@@ -265,28 +274,29 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                                                                                                          "d.heartbeat_interval");
 
                     if (ws_payload->client_object->heartbeat_main == NULL) {
-                        yadl_pthread_context_t *heartbeat_main_context = yadl_pthread_create(main_send_heartbeat,
-                                                                                             NULL,ws_payload);
+                        yadl_pthread_context_t *heartbeat_main_context = yadl_pthread_create(
+                                main_websocket_send_heartbeat,
+                                NULL, ws_payload);
 
                         ws_payload->client_object->heartbeat_main = heartbeat_main_context->pthread;
                         ws_payload->client_object->main_heartbeat_cond = heartbeat_main_context->pthread_cond;
                         ws_payload->client_object->main_heartbeat_mutex = heartbeat_main_context->pthread_mutex;
                         lwsl_user("op %d, Started main heartbeat thread..", op_code);
 
-                        main_client_wait_signal(ws_payload->client_object->main_client_mutex,
-                                                ws_payload->client_object->main_client_cond, NULL);
+                        main_websocket_wait_signal(ws_payload->client_object->main_client_mutex,
+                                                   ws_payload->client_object->main_client_cond, NULL);
                     } else {
                         pthread_cond_signal(ws_payload->client_object->main_heartbeat_cond);
                         lwsl_user("op %d, Sent signal to exist heartbeat thread..", op_code);
 
-                        main_client_wait_signal(ws_payload->client_object->main_client_mutex,
-                                                ws_payload->client_object->main_client_cond, NULL);
+                        main_websocket_wait_signal(ws_payload->client_object->main_client_mutex,
+                                                   ws_payload->client_object->main_client_cond, NULL);
                     }
 
                     if(!ws_payload->client_object->invalid_session && strlen(ws_payload->client_object->session_id)) {
                         root_object = yadl_json_object_builder(NULL);
                         json_object_dotset_number(root_object, "op", 6);
-                        json_object_dotset_string(root_object, "d.token", yadl_context->info.TOKEN);
+                        json_object_dotset_string(root_object, "d.token", context->info.TOKEN);
                         json_object_dotset_string(root_object, "d.session_id", ws_payload->client_object->session_id);
                         json_object_dotset_number(root_object, "d.seq", (double) *ws_payload->client_object->sequence);
 
@@ -296,15 +306,16 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                         ws_payload->client_object->invalid_session = false;
                         root_object = yadl_json_object_builder(NULL);
                         json_object_dotset_number(root_object, "op", 2);
-                        json_object_dotset_string(root_object, "d.token", yadl_context->info.TOKEN);
+                        json_object_dotset_string(root_object, "d.token", context->info.TOKEN);
                         json_object_dotset_string(root_object, "d.properties.$os", YADL_CLIENT_OS);
-                        json_object_dotset_string(root_object, "d.properties.$browser", yadl_context->info.APPLICATION);
-                        json_object_dotset_string(root_object, "d.properties.$device", yadl_context->info.APPLICATION);
+                        json_object_dotset_string(root_object, "d.properties.$browser", context->info.APPLICATION);
+                        json_object_dotset_string(root_object, "d.properties.$device", context->info.APPLICATION);
                         json_object_dotset_string(root_object, "d.presence.status", "idle");
                         json_object_dotset_boolean(root_object, "d.presence.afk", false);
                         json_object_dotset_value(root_object, "d.presence.activities",
                                                  json_parse_string("[{\"name\": \"Testing\", \"type\": 1}]"));
-                        json_object_dotset_number(root_object, "d.intents", yadl_context->info.GATEWAY_INTENTS);
+                        json_object_dotset_number(root_object, "d.intents", context->info.GATEWAY_INTENTS);
+                        json_object_dotset_boolean(root_object, "d.compress", true);
                         yadl_json_lws_write(wsi, root_object);
                     }
                     break;
@@ -321,6 +332,11 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
             break;
 
         case LWS_CALLBACK_WS_PEER_INITIATED_CLOSE: {
+//            Bytef *compress_data = yadl_malloc(len);
+//            memcpy(compress_data, in, len);
+//            if((in = main_websocket_uncompress(compress_data, &len)) == NULL)
+//                break;
+
             int16_t code;
             char *close_reason = yadl_malloc(len - 2);
 
@@ -342,7 +358,8 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
         case LWS_CALLBACK_CLIENT_CLOSED:
             if (!ws_payload->connection_exhausted) {
                 lwsl_err("Client disconnected websocket connection. trying to reconnect..");
-                connection_retry(wsi, &ws_payload->sul, schedule_callback, &ws_payload->retry_count);
+                main_websocket_connection_retry(wsi, &ws_payload->sul, main_websocket_schedule_callback,
+                                                &ws_payload->retry_count);
             } else
                 return -1;
             break;
@@ -361,8 +378,8 @@ static const struct lws_protocols protocols[] = {
 
 int start_main_client(yadl_context_t *yadl_context) {
     yadl_pthread_append(pthread_self());
-    struct http_result *http_result = http_request("GET", (char *) YADL_RETRIEVE_GATEWAY_URL, NULL, NULL,
-                                                   (char *) YADL_USER_AGENT, NULL);
+    http_result_t *http_result = http_request("GET", (char *) YADL_RETRIEVE_GATEWAY_URL, NULL, NULL,
+                                                   (char *) YADL_USER_AGENT, NULL, 0);
 
     if (!strlen(*http_result->response_body)) {
         lwsl_err("Can't retrieve discord gateway address. check your internet connection.");
@@ -398,7 +415,7 @@ int start_main_client(yadl_context_t *yadl_context) {
     sscanf(URL, "wss://%99[^/]/%199[^\n]", main_payload->address, main_payload->path);
 
     /* schedule the first client connection attempt to happen immediately */
-    lws_sul_schedule(main_payload->context, 0x0, &main_payload->sul, schedule_callback, 1);
+    lws_sul_schedule(main_payload->context, 0x0, &main_payload->sul, main_websocket_schedule_callback, 1);
 
     int n = 0;
     while (!main_payload->connection_exhausted && n >= 0)
@@ -408,6 +425,8 @@ int start_main_client(yadl_context_t *yadl_context) {
     main_payload->client_wsi = NULL;
     yadl_gc_set_alive(false);
 
+    inflateEnd(inflate_stream);
+    printf("AA");
     pthread_join(*((yadl_pthread_context_t *) ((gc_node_t *) yadl_gc_get_context(
             YADL_GC_NODE_PTHREAD))->address)->pthread, NULL);
     return 0;
