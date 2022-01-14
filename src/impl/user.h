@@ -52,4 +52,6 @@ typedef yadl_user self_user_t;
 
 user_t *parse_user(JSON_Value *user_value);
 
+JSON_Value *struct_user(user_t *user);
+
 #endif //YADL_USER_H

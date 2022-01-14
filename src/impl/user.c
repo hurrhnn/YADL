@@ -47,3 +47,25 @@ user_t *parse_user(JSON_Value *user_value) {
 
     return result;
 }
+
+JSON_Value *struct_user(user_t *user) {
+    JSON_Object *result = yadl_json_object_builder(NULL);
+
+    json_object_set_string(result, "id", user->id);
+    json_object_set_string(result, "username", user->username);
+    json_object_set_string(result, "discriminator", user->discriminator);
+    json_object_set_string(result, "avatar", user->avatar);
+    json_object_set_boolean(result, "bot", user->bot);
+    json_object_set_boolean(result, "system", user->system);
+    json_object_set_boolean(result, "mfa_enabled", user->mfa_enabled);
+    json_object_set_string(result, "banner", user->banner);
+    json_object_set_number(result, "accent_color", user->accent_color);
+    json_object_set_string(result, "locale", user->locale);
+    json_object_set_boolean(result, "verified", user->verified);
+    json_object_set_string(result, "email", user->email);
+    json_object_set_number(result, "flags", user->flags);
+    json_object_set_number(result, "premium_type", user->premium_type);
+    json_object_set_number(result, "public_flags", user->public_flags);
+
+    return json_object_get_wrapping_value(result);
+}
