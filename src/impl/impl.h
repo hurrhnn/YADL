@@ -22,6 +22,7 @@
 #define YADL_IMPL_H
 
 #include "../callback/callback.h"
+#include "impl-inl.h"
 #include "guild.h"
 #include "user.h"
 #include "application.h"
@@ -91,13 +92,18 @@
 #define YADL_OBJECT_VOICE_STATE 48
 #define YADL_OBJECT_VOICE_REGION 49
 #define YADL_OBJECT_WEBHOOK 50
-
-typedef struct yadl_context yadl_context_t;
+#define YADL_OBJECT_TEAM 51
+#define YADL_OBJECT_TEAM_MEMBER 52
 
 typedef struct yadl_object_metadata {
     size_t type;
     char member_size[YADL_MIDIUM_SIZE];
 } yadl_object_metadata_t;
+
+typedef struct yadl_object_array {
+    size_t size;
+    void **array;
+} yadl_object_array_t;
 
 typedef union {
     struct {
@@ -118,15 +124,9 @@ typedef union {
         u_int8_t DIRECT_MESSAGE_TYPING     : 1;
     } flags;
     u_int16_t value;
-} yadl_gateway_intents;
+} yadl_gateway_intents_t;
 
 #define YADL_GATEWAY_INTENTS_DEFAULT 32509
 #define YADL_GATEWAY_INTENTS_ALL 32767
-
-bool yadl_object_overridable(size_t type);
-
-void *yadl_object_override(obj_list_t *list, char* key, void* object, yadl_object_metadata_t *metadata);
-
-void yadl_object_init(yadl_context_t *context);
 
 #endif //YADL_IMPL_H
