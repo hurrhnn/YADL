@@ -27,10 +27,11 @@
 #include "../json/json.h"
 
 typedef struct __attribute__((__packed__)) {
+    char *id;
     char *filename;
     char *description;
     char *content_type;
-    int size;
+    u_int32_t size;
     char *url;
     char *proxy_url;
     int height;
@@ -40,5 +41,7 @@ typedef struct __attribute__((__packed__)) {
 } attachment_t;
 
 attachment_t *parse_attachment(JSON_Value *attachment_value);
+
+JSON_Value *struct_attachment(attachment_t *attachment);
 
 #endif //YADL_ATTACHMENT_H
