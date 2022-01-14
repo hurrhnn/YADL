@@ -23,26 +23,31 @@
 
 #include "parson.h"
 #include "../utils/utils.h"
+#include "user.h"
+#include "guild.h"
+#include "channel.h"
 
 typedef struct __attribute__((__packed__)) {
     char *id;
     int type;
     char *guild_id;
     char *channel_id;
-    char *user;
+    user_t *user;
     /* user object */
     char *name;
     char *avatar;
     char *token;
     char *application_id;
-    char *source_guild;
+    guild_t *source_guild;
     /* partial guild object */
-    char *source_channel;
+    channel_t *source_channel;
     /* partial channel object */
     char *url;
 
 } webhook_t;
 
 webhook_t *parse_webhook(JSON_Value *webhook_value);
+
+JSON_Value *struct_webhook(webhook_t *webhook);
 
 #endif //YADL_WEBHOOK_H

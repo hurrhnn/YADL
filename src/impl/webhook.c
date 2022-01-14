@@ -28,15 +28,35 @@ webhook_t *parse_webhook(JSON_Value *webhook_value) {
                            (int) json_object_get_number(webhook, "type"),
                            (char *) json_object_get_string(webhook, "guild_id"),
                            (char *) json_object_get_string(webhook, "channel_id"),
-                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(webhook, "user"))),
+                           parse_user(json_object_get_wrapping_value(json_object_get_object(webhook, "user"))),
                            (char *) json_object_get_string(webhook, "name"),
                            (char *) json_object_get_string(webhook, "avatar"),
                            (char *) json_object_get_string(webhook, "token"),
                            (char *) json_object_get_string(webhook, "application_id"),
-                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(webhook, "source_guild"))),
-                           (char *) json_serialize_to_string_pretty(json_object_get_wrapping_value(json_object_get_object(webhook, "source_channel"))),
+                           parse_guild(json_object_get_wrapping_value(json_object_get_object(webhook, "source_guild"))),
+                           parse_channel(json_object_get_wrapping_value(json_object_get_object(webhook, "source_channel"))),
                            (char *) json_object_get_string(webhook, "url")
     };
 
     return result;
 }
+
+JSON_Value *struct_webhook(webhook_t *webhook) {
+    JSON_Object *result = yadl_json_object_builder(NULL);
+
+    json_object_set_string(result, "id", webhook->id);
+    json_object_set_number(result, "type", webhook->type);
+    json_object_set_string(result, "guild_id", webhook->guild_id);
+    json_object_set_string(result, "channel_id", webhook->channel_id);
+    json_object_set_value(result, "user", struct_user(webhook->user));
+    json_object_set_string(result, "name", webhook->name);
+    json_object_set_string(result, "avatar", webhook->avatar);
+    json_object_set_string(result, "token", webhook->token);
+    json_object_set_string(result, "application_id", webhook->application_id);
+    json_object_set_value(result, "source_guild", struct_guild(webhook->source_guild));
+    json_object_set_value(result, "source_channel", struct_channel(webhook->source_channel));
+    json_object_set_string(result, "url", webhook->url);
+
+    return json_object_get_wrapping_value(result);
+}
+
