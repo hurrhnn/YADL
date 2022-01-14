@@ -21,14 +21,14 @@
 #ifndef YADL_JSON_H
 #define YADL_JSON_H
 
+#include <stdbool.h>
 #include "parson.h"
 #include "libwebsockets.h"
-
 #include "../utils/utils.h"
 
 JSON_Object *yadl_json_object_builder(const char *raw);
 
-JSON_Array *yadl_json_array_builder();
+JSON_Array *yadl_json_array_builder(const char *raw);
 
 bool yadl_json_boolean_null_check(int result);
 
