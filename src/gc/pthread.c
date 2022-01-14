@@ -19,8 +19,12 @@
 */
 
 #include "pthread.h"
+#include "gc.h"
 
 void *yadl_pthread_create(void *function, pthread_attr_t *pthread_attr, void *args) {
+    if(!function)
+        return NULL;
+
     yadl_pthread_context_t *pthread_context = yadl_malloc(sizeof(yadl_pthread_context_t), true);
     if(pthread_attr == NULL) {
         pthread_attr = yadl_malloc(sizeof(pthread_attr_t), true);
