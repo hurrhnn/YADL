@@ -21,7 +21,10 @@
 #ifndef YADL_API_H
 #define YADL_API_H
 
-#include "get_current_user.h"
-#include "get_user.h"
+#include "retrieve_user_by_id.h"
+#include "retrieve_self_user.h"
+#include "retrieve_application_info.h"
+#include "retrieve_channel_by_id.h"
+#include "create_message.h"
 
 #endif //YADL_API_H
