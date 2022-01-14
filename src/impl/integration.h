@@ -21,33 +21,15 @@
 #ifndef YADL_INTEGRATION_H
 #define YADL_INTEGRATION_H
 
+#define YADL_INTEGRATION_EXPIRE_BEHAVIOR_REMOVE_ROLE 0
+#define YADL_INTEGRATION_EXPIRE_BEHAVIOR__KICK 1
+
 #include <stdbool.h>
 #include "parson.h"
 #include "../utils/utils.h"
 #include "../json/json.h"
-
-typedef struct __attribute__((__packed__)) {
-    char *id;
-    char *name;
-    char *type;
-    bool enabled;
-    bool syncing;
-    char *role_id;
-    bool enable_emoticons;
-    char *expire_behavior;
-    /* integration expire behavior */
-    int expire_grace_period;
-    char *user;
-    /* user object */
-    char *account;
-    /* account object */
-    char *synced_at;
-    int subscriber_count;
-    bool revoked;
-    char *application;
-    /* application object */
-
-} integration_t;
+#include "user.h"
+#include "application.h"
 
 typedef struct __attribute__((__packed__)) {
     char *id;
@@ -58,10 +40,33 @@ typedef struct __attribute__((__packed__)) {
 typedef struct __attribute__((__packed__)) {
     char *id;
     char *name;
+    char *type;
+    bool enabled;
+    bool syncing;
+    char *role_id;
+    bool enable_emoticons;
+    int expire_behavior;
+    /* integration expire behavior */
+    int expire_grace_period;
+    user_t *user;
+    /* user object */
+    integration_account_t *account;
+    /* account object */
+    char *synced_at;
+    int subscriber_count;
+    bool revoked;
+    application_t *application;
+    /* application object */
+
+} integration_t;
+
+typedef struct __attribute__((__packed__)) {
+    char *id;
+    char *name;
     char *icon;
     char *description;
     char *summary;
-    char *bot;
+    user_t *bot;
     /* user object */
 
 } integration_application_t;
@@ -71,5 +76,11 @@ integration_t *parse_integration(JSON_Value *integration_value);
 integration_account_t *parse_integration_account(JSON_Value *integration_account_value);
 
 integration_application_t *parse_integration_application(JSON_Value *integration_application_value);
+
+JSON_Value *struct_integration_application(integration_application_t *integration_application);
+
+JSON_Value *struct_integration_account(integration_account_t *integration_account);
+
+JSON_Value *struct_integration(integration_t *integration);
 
 #endif //YADL_INTEGRATION_H
