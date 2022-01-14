@@ -21,8 +21,8 @@
 #include "yadl.h"
 #include "websockets/main_client.h"
 
-void yadl_init(yadl_context_t *yadl_context) {
-    yadl_context_info_t *yadl_info = &yadl_context->info;
+void yadl_init(yadl_context_t *context) {
+    yadl_context_info_t *yadl_info = &context->info;
 
     YADL_SET_VALUE_IF_NULL(yadl_info->API_VER, YADL_DEFAULT_API_VER);
     YADL_SET_VALUE_IF_NULL(yadl_info->GATEWAY_VER, YADL_DEFAULT_GATEWAY_VER);
@@ -37,15 +37,23 @@ void yadl_init(yadl_context_t *yadl_context) {
     sprintf(yadl_info->APPLICATION, "%s v%s", YADL_APPLICATION, YADL_VERSION);
 
     yadl_gc_init();
-    yadl_object_init(yadl_context);
+    yadl_object_init(context);
 }
 
-void yadl_launch(yadl_context_t *yadl_context) {
-    lws_set_log_level(LLL_ERR, NULL);
-    start_main_client(yadl_context);
+void yadl_launch(yadl_context_t *context) {
+    lws_set_log_level(LLL_ERR | LLL_WARN, NULL);
+    start_main_client(context);
 }
 
-void yadl_cleanup() {
+void yadl_cleanup(yadl_context_t *context) {
     free_node(yadl_gc_get_context(YADL_GC_NODE_ADDRESS));
     free_node(yadl_gc_get_context((int8_t) YADL_NON_GC_NODE));
+
+    free_list(context->guilds);
+    free_list(context->users);
+
+    free_list(context->dm_channels);
+    free_list(context->guild_text_channels);
+    free_list(context->guild_voice_channels);
+    yadl_free(context->self_user);
 }

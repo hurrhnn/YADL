@@ -50,14 +50,20 @@ typedef struct yadl_context {
     yadl_event_cb_t callbacks;
 
     self_user_t *self_user;
-    obj_list_t *guilds;
     obj_list_t *users;
+    obj_list_t *guilds;
+
+    obj_list_t *dm_channels;
+    obj_list_t *guild_text_channels;
+    obj_list_t *guild_voice_channels;
+
+    void* user_data;
 } yadl_context_t;
 
-void yadl_init(yadl_context_t *yadl_context);
+void yadl_init(yadl_context_t *context);
 
-void yadl_launch(yadl_context_t *yadl_context);
+void yadl_launch(yadl_context_t *context);
 
-void yadl_cleanup();
+void yadl_cleanup(yadl_context_t *context);
 
 #endif
