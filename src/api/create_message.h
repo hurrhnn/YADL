@@ -21,6 +21,16 @@
 #ifndef YADL_CREATE_MESSAGE_H
 #define YADL_CREATE_MESSAGE_H
 
+#include "../utils/utils.h"
+#include "../http/http_request.h"
+#include "../impl/impl.h"
+#include "../yadl.h"
+
 #define YADL_CREATE_MESSAGE_PATH "/channels/%s/messages"
+#define YADL_CREATE_MESSAGE_LIMIT_ATTACHMENT_SIZE 8388608
+
+void yadl_create_message(yadl_context_t *context, const char *channel_id, const char *content, bool is_tts, yadl_object_array_t *embeds,
+                         allowed_mentions_t *allowed_mentions, message_reference_t *message_reference,
+                         yadl_object_array_t *attachments, yadl_object_array_t *files);
 
 #endif //YADL_CREATE_MESSAGE_H
