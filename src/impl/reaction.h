@@ -25,15 +25,18 @@
 #include "parson.h"
 #include "../utils/utils.h"
 #include "../json/json.h"
+#include "emoji.h"
 
 typedef struct __attribute__((__packed__)) {
     int count;
     bool me;
-    char *emoji;
+    emoji_t *emoji;
     /* partial emoji object */
 
 } reaction_t;
 
 reaction_t *parse_reaction(JSON_Value *reaction_value);
+
+JSON_Value *struct_reaction(reaction_t *reaction);
 
 #endif //YADL_REACTION_H
