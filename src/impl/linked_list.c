@@ -34,10 +34,11 @@ obj_list_t *put_list(size_t type, obj_list_t *list, char *key, void *value) {
         return list;
     }
 
-    if (!strcmp(key, list->key))
+    if (!strcmp(key, list->key)) {
         list->value = yadl_object_overridable(type) ? yadl_object_override(list, key, value, yadl_get_object_metadata(type)) : value;
-    else
+    } else
         list->next = put_list(type, list->next, key, value);
+
     return list;
 }
 
@@ -53,7 +54,7 @@ void *get_list(obj_list_t *list, char *key) {
 void free_list(obj_list_t *list) {
     if (list != NULL) {
         free_list(list->next);
-        free(list->value);
-        free(list);
+        yadl_free(list->value, true);
+        yadl_free(list, true);
     }
 }
