@@ -23,9 +23,27 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "parson.h"
 #include "../utils/utils.h"
 #include "../json/json.h"
-#include "parson.h"
+#include "user.h"
+
+typedef struct yadl_object_array yadl_object_array_t;
+
+typedef struct __attribute__((__packed__)) {
+    char *channel_id;
+    char *description;
+    char *emoji_id;
+    char *emoji_name;
+
+} welcome_screen_channel_t;
+
+typedef struct __attribute__((__packed__)) {
+    char *description;
+    yadl_object_array_t *welcome_channels;
+    /* array of welcome screen channel objects */
+
+} welcome_screen_t;
 
 typedef struct __attribute__((__packed__)) {
     char *id;
@@ -47,7 +65,7 @@ typedef struct __attribute__((__packed__)) {
     int explicit_content_filter;
     char *roles;
     /* array of role objects */
-    char *emojis;
+    yadl_object_array_t *emojis;
     /* array of emoji objects */
     char *features;
     /* array of guild feature strings */
@@ -60,11 +78,11 @@ typedef struct __attribute__((__packed__)) {
     bool large;
     bool unavailable;
     int member_count;
-    char *voice_states;
+    yadl_object_array_t *voice_states;
     /* array of partial voice state objects */
-    char *members;
+    yadl_object_array_t *members;
     /* array of guild member objects */
-    char *channels;
+    yadl_object_array_t *channels;
     /* array of channel objects */
     char *threads;
     /* array of channel objects */
@@ -82,43 +100,38 @@ typedef struct __attribute__((__packed__)) {
     int max_video_channel_users;
     int approximate_member_count;
     int approximate_presence_count;
-    char *welcome_screen;
+    welcome_screen_t *welcome_screen;
     /* welcome screen object */
     int nsfw_level;
     char *stage_instances;
     /* array of stage instance objects */
-    char *stickers;
+    yadl_object_array_t *stickers;
     /* array of sticker objects */
-    char *guild_scheduled_events;
+    yadl_object_array_t *guild_scheduled_events;
     /* array of guild scheduled event objects */
     bool premium_progress_bar_enabled;
 
 } guild_t;
 
 typedef struct __attribute__((__packed__)) {
-    char *id;
+    char *code;
     char *name;
-    char *icon;
-    char *splash;
-    char *discovery_splash;
-    char *emojis;
-    /* array of emoji objects */
-    char *features;
-    /* array of guild feature strings */
-    int approximate_member_count;
-    int approximate_presence_count;
     char *description;
+    int usage_count;
+    char *creator_id;
+    user_t *creator;
+    /* user object */
+    char *created_at;
+    char *updated_at;
+    char *source_guild_id;
+    guild_t *serialized_source_guild;
+    /* partial guild object */
+    bool is_dirty;
 
-} guild_preview_t;
+} guild_template_t;
 
 typedef struct __attribute__((__packed__)) {
-    bool enabled;
-    char *channel_id;
-
-} guild_widget_t;
-
-typedef struct __attribute__((__packed__)) {
-    char *user;
+    user_t *user;
     /* user object */
     char *nick;
     char *avatar;
@@ -135,26 +148,13 @@ typedef struct __attribute__((__packed__)) {
 } guild_member_t;
 
 typedef struct __attribute__((__packed__)) {
-    char *reason;
-    char *user;
-    /* user object */
+    char *guild_scheduled_event_id;
+    user_t *user;
+    /* user */
+    guild_member_t *member;
+    /* guild member */
 
-} ban_t;
-
-typedef struct __attribute__((__packed__)) {
-    char *description;
-    char *welcome_channels;
-    /* array of welcome screen channel objects */
-
-} welcome_screen_t;
-
-typedef struct __attribute__((__packed__)) {
-    char *channel_id;
-    char *description;
-    char *emoji_id;
-    char *emoji_name;
-
-} welcome_screen_channel_t;
+} guild_scheduled_event_user_t;
 
 typedef struct __attribute__((__packed__)) {
     char *id;
@@ -174,37 +174,40 @@ typedef struct __attribute__((__packed__)) {
     char *entity_id;
     char *entity_metadata;
     /* entity metadata */
-    char *creator;
+    user_t *creator;
     /* user object */
     int user_count;
 
 } guild_scheduled_event_t;
 
 typedef struct __attribute__((__packed__)) {
-    char *guild_scheduled_event_id;
-    char *user;
-    /* user */
-    char *member;
-    /* guild member */
+    char *reason;
+    user_t *user;
+    /* user object */
 
-} guild_scheduled_event_user_t;
+} ban_t;
 
 typedef struct __attribute__((__packed__)) {
-    char *code;
-    char *name;
-    char *description;
-    int usage_count;
-    char *creator_id;
-    char *creator;
-    /* user object */
-    char *created_at;
-    char *updated_at;
-    char *source_guild_id;
-    char *serialized_source_guild;
-    /* partial guild object */
-    bool is_dirty;
+    bool enabled;
+    char *channel_id;
 
-} guild_template_t;
+} guild_widget_t;
+
+typedef struct __attribute__((__packed__)) {
+    char *id;
+    char *name;
+    char *icon;
+    char *splash;
+    char *discovery_splash;
+    yadl_object_array_t *emojis;
+    /* array of emoji objects */
+    char *features;
+    /* array of guild feature strings */
+    int approximate_member_count;
+    int approximate_presence_count;
+    char *description;
+
+} guild_preview_t;
 
 guild_t *parse_guild(JSON_Value *guild_value);
 
@@ -225,5 +228,27 @@ guild_scheduled_event_t *parse_guild_scheduled_event(JSON_Value *guild_scheduled
 guild_scheduled_event_user_t *parse_guild_scheduled_event_user(JSON_Value *guild_scheduled_event_user_value);
 
 guild_template_t *parse_guild_template(JSON_Value *guild_template_value);
+
+JSON_Value *struct_guild_template(guild_template_t *guild_template);
+
+JSON_Value *struct_guild_scheduled_event_user(guild_scheduled_event_user_t *guild_scheduled_event_user);
+
+JSON_Value *struct_guild_scheduled_event(guild_scheduled_event_t *guild_scheduled_event);
+
+JSON_Value *struct_welcome_screen_channel(welcome_screen_channel_t *welcome_screen_channel);
+
+JSON_Value *struct_welcome_screen(welcome_screen_t *welcome_screen);
+
+JSON_Value *struct_ban(ban_t *ban);
+
+JSON_Value *struct_guild_member(guild_member_t *guild_member);
+
+JSON_Value *struct_guild_widget(guild_widget_t *guild_widget);
+
+JSON_Value *struct_guild_preview(guild_preview_t *guild_preview);
+
+JSON_Value *struct_guild(guild_t *guild);
+
+
 
 #endif //YADL_GUILD_H
