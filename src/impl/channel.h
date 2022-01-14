@@ -21,17 +21,32 @@
 #ifndef YADL_CHANNEL_H
 #define YADL_CHANNEL_H
 
+#define YADL_CHANNEL_GUILD_TEXT           0
+#define YADL_CHANNEL_DM	                  1
+#define YADL_CHANNEL_GUILD_VOICE          2
+#define YADL_CHANNEL_GROUP_DM             3
+#define YADL_CHANNEL_GUILD_CATEGORY	      4
+#define YADL_CHANNEL_GUILD_NEWS	          5
+#define YADL_CHANNEL_GUILD_STORE          6
+#define YADL_CHANNEL_GUILD_NEWS_THREAD    10
+#define YADL_CHANNEL_GUILD_PUBLIC_THREAD  11
+#define YADL_CHANNEL_GUILD_PRIVATE_THREAD 12
+#define YADL_CHANNEL_GUILD_STAGE_VOICE    13
+
 #include <stdbool.h>
 #include "parson.h"
 #include "../utils/utils.h"
 #include "../json/json.h"
+#include "guild.h"
+
+typedef struct yadl_object_array yadl_object_array_t;
 
 typedef struct __attribute__((__packed__)) {
     char *id;
     int type;
     char *guild_id;
     int position;
-    char *permission_overwrites;
+    yadl_object_array_t *permission_overwrites;
     /* array of overwrite objects */
     char *name;
     char *topic;
@@ -40,7 +55,7 @@ typedef struct __attribute__((__packed__)) {
     int bitrate;
     int user_limit;
     int rate_limit_per_user;
-    char *recipients;
+    yadl_object_array_t *recipients;
     /* array of user objects */
     char *icon;
     char *owner_id;
@@ -53,7 +68,7 @@ typedef struct __attribute__((__packed__)) {
     int member_count;
     char *thread_metadata;
     /* a thread metadata object */
-    char *member;
+    guild_member_t *member;
     /* a thread member object */
     int default_auto_archive_duration;
     char *permissions;
@@ -79,10 +94,28 @@ typedef struct __attribute__((__packed__)) {
 
 } allowed_mentions_t;
 
+typedef struct __attribute__((__packed__)) {
+    char *id;
+    int type;
+    char *allow;
+    char *deny;
+
+} overwrite_t;
+
 channel_t *parse_channel(JSON_Value *channel_value);
 
 channel_mention_t *parse_channel_mention(JSON_Value *channel_mention_value);
 
 allowed_mentions_t *parse_allowed_mentions(JSON_Value *allowed_mentions_value);
+
+overwrite_t *parse_overwrite(JSON_Value *overwrite_value);
+
+JSON_Value *struct_overwrite(overwrite_t *overwrite);
+
+JSON_Value *struct_allowed_mentions(allowed_mentions_t *allowed_mentions);
+
+JSON_Value *struct_channel_mention(channel_mention_t *channel_mention);
+
+JSON_Value *struct_channel(channel_t *channel);
 
 #endif //YADL_CHANNEL_H
