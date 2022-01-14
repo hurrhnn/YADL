@@ -48,4 +48,8 @@ thread_metadata_t *parse_thread_metadata(JSON_Value *thread_metadata_value);
 
 thread_member_t *parse_thread_member(JSON_Value *thread_member_value);
 
+JSON_Value *struct_thread_member(thread_member_t *thread_member);
+
+JSON_Value *struct_thread_metadata(thread_metadata_t *thread_metadata);
+
 #endif //YADL_THREAD_H
