@@ -332,13 +332,8 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
             break;
 
         case LWS_CALLBACK_WS_PEER_INITIATED_CLOSE: {
-//            Bytef *compress_data = yadl_malloc(len);
-//            memcpy(compress_data, in, len);
-//            if((in = main_websocket_uncompress(compress_data, &len)) == NULL)
-//                break;
-
             int16_t code;
-            char *close_reason = yadl_malloc(len - 2);
+            char *close_reason = yadl_malloc(len - 1);
 
             memcpy(&code, in, 0x2);
             memcpy(close_reason, in + 0x2, len - 0x2);

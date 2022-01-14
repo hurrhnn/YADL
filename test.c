@@ -70,17 +70,18 @@ void on_guild_create(const struct yadl_event_on_guild_create *event) {
 }
 
 void on_guild_message_create(const struct yadl_event_on_guild_message_create *event) {
-    if (strcmp(event->author->id, event->context->self_user->id) != 0) {
+    char *content = event->message->content;
+    if (strlen(content) && strcmp(event->author->id, event->context->self_user->id) != 0) {
         printf("[GUILD_MESSAGE][%s][%s][%s][%s#%s]: %s\n", event->message->timestamp,
                event->guild->name,
                event->channel->name,
                event->author->username,
                event->author->discriminator,
-               event->message->content);
+               content);
 
         bool is_install = false;
-        if ((is_install = (!strcmp(event->message->content, "!!install"))) ||
-            (!strcmp(event->message->content, "!!uninstall"))) {
+        if ((is_install = (!strcmp(content, "!!install"))) ||
+            (!strcmp(content, "!!uninstall"))) {
             if (is_install) {
                 event->context->user_data = event->channel->id;
                 yadl_create_message(event->context, event->channel->id, "`Successfully Installed.`",
@@ -91,11 +92,11 @@ void on_guild_message_create(const struct yadl_event_on_guild_message_create *ev
                                     false, NULL, NULL, NULL, NULL, NULL);
             }
 
-        } else if (strstr(event->message->content, "!!file ")) {
+        } else if (strstr(content, "!!file ")) {
             application_t *application = yadl_retrieve_application_info(event->context);
             for (int i = 0; i < application->team->members->size; i++) {
                 if (!strcmp(((team_member_t *) application->team->members->array[i])->user->id, event->author->id)) {
-                    char *parse_pos = strstr(event->message->content, "!!file "), *file_name =
+                    char *parse_pos = strstr(content, "!!file "), *file_name =
                             parse_pos + strlen("!!file ");
                     if (parse_pos != NULL) {
                         FILE *fp;
@@ -124,11 +125,11 @@ void on_guild_message_create(const struct yadl_event_on_guild_message_create *ev
                         fclose(fp);
                         files->array[0] = file_data;
 
-                        char *content = yadl_malloc(YADL_MIDIUM_SIZE);
-                        sprintf(content, "`File: %s`", file_name);
+                        char *send_content = yadl_malloc(YADL_MIDIUM_SIZE);
+                        sprintf(send_content, "`File: %s`", file_name);
 
-                        yadl_create_message(event->context, event->channel->id, content, false,
-                                            NULL, NULL, NULL, attachments, files);
+                        yadl_create_message(event->context, event->channel->id, send_content,
+                                            false, NULL, NULL, NULL, attachments, files);
                         return;
                     }
                 }
@@ -145,10 +146,10 @@ void on_guild_message_create(const struct yadl_event_on_guild_message_create *ev
             embeds->array[0] = embed;
             embeds->size = 1;
 
-            yadl_create_message(event->context, event->channel->id,
-                                NULL, false, embeds, NULL, reference, NULL, NULL);
+            yadl_create_message(event->context, event->channel->id, NULL, false,
+                                embeds, NULL, reference, NULL, NULL);
 
-        } else if (strstr(event->message->content, "ㅠㅠ") || strstr(event->message->content, "bb")) {
+        } else if (strstr(content, "ㅠㅠ") || strstr(content, "bb")) {
             embed_image_t *embed_image = yadl_malloc(sizeof(embed_image_t));
             embed_image->url = "https://media.discordapp.net/attachments/686272875010850857/900913724183941170/nichijou.gif";
 
@@ -165,17 +166,17 @@ void on_guild_message_create(const struct yadl_event_on_guild_message_create *ev
             embeds->array[0] = embed;
             embeds->size = 1;
 
-            yadl_create_message(event->context, event->channel->id,
-                                NULL, false, embeds, NULL, NULL, NULL, NULL);
-        } else if (strstr(event->message->content, "고양이") || strstr(event->message->content, "애옹") ||
-                   strstr(event->message->content, "cat")) {
+            yadl_create_message(event->context, event->channel->id, NULL, false,
+                                embeds, NULL, NULL, NULL, NULL);
+        } else if (strstr(content, "고양이") || strstr(content, "애옹") || strstr(content, "cat")) {
             char **result = http_request("GET", "https://api.thecatapi.com/v1/images/search", NULL, NULL,
                                          event->context->info.USER_AGENT, NULL, 0)->response_body;
+
             JSON_Array *cat_data = yadl_json_array_builder(*result);
             yadl_create_message(event->context, event->channel->id,
-                                json_object_get_string(json_array_get_object(cat_data, 0), "url"), false, NULL, NULL,
-                                NULL, NULL, NULL);
-        } else if (strstr(event->message->content, ";;")) {
+                                json_object_get_string(json_array_get_object(cat_data, 0), "url"),
+                                false, NULL, NULL, NULL, NULL, NULL);
+        } else if (strstr(content, ";;")) {
             yadl_create_message(event->context, event->channel->id, "하라는 코딩은 안하고!",
                                 false, NULL, NULL, NULL, NULL, NULL);
         }
