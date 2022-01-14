@@ -23,7 +23,7 @@
 
 #define YADL_MAJOR_VERSION "0"
 #define YADL_MINOR_VERSION "0"
-#define YADL_REVISION "4"
+#define YADL_REVISION "5"
 #define YADL_VERSION (YADL_MAJOR_VERSION "." YADL_MINOR_VERSION "." YADL_REVISION)
 
 #define YADL_DEFAULT_API_VER 9
@@ -36,7 +36,7 @@
 
 #define YADL_RETRIEVE_GATEWAY_URL "https://discord.com/api/gateway"
 
-#define YADL_GATEWAY_PATH "/?v=%d&encoding=json"
+#define YADL_GATEWAY_PATH "/?v=%d&encoding=json&compress=zlib-stream"
 #define YADL_VOICE_PATH "/?v=%d"
 
 #define YADL_API_URL "https://discord.com/api/v%d"
