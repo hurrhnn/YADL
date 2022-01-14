@@ -25,6 +25,9 @@
 #include "parson.h"
 #include "../utils/utils.h"
 #include "../json/json.h"
+#include "user.h"
+
+typedef struct yadl_object_array yadl_object_array_t;
 
 typedef struct __attribute__((__packed__)) {
     char *id;
@@ -37,7 +40,7 @@ typedef struct __attribute__((__packed__)) {
     int format_type;
     bool available;
     char *guild_id;
-    char *user;
+    user_t *user;
     /* user object */
     int sort_value;
 
@@ -52,7 +55,7 @@ typedef struct __attribute__((__packed__)) {
 
 typedef struct __attribute__((__packed__)) {
     char *id;
-    char *stickers;
+    yadl_object_array_t *stickers;
     /* array of sticker objects */
     char *name;
     char *sku_id;
@@ -61,5 +64,17 @@ typedef struct __attribute__((__packed__)) {
     char *banner_asset_id;
 
 } sticker_pack_t;
+
+sticker_t *parse_sticker(JSON_Value *sticker_value);
+
+sticker_item_t *parse_sticker_item(JSON_Value *sticker_item_value);
+
+sticker_pack_t *parse_sticker_pack(JSON_Value *sticker_pack_value);
+
+JSON_Value *struct_sticker_pack(sticker_pack_t *sticker_pack);
+
+JSON_Value *struct_sticker_item(sticker_item_t *sticker_item);
+
+JSON_Value *struct_sticker(sticker_t *sticker);
 
 #endif //YADL_STICKER_H
