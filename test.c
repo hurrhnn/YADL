@@ -19,6 +19,7 @@
 */
 
 #include <stdio.h>
+#include <dlfcn.h>
 #include "src/yadl.h"
 
 void on_ready(const struct yadl_event_on_ready *event) {
@@ -169,16 +170,104 @@ void on_guild_message_create(const struct yadl_event_on_guild_message_create *ev
             yadl_create_message(event->context, event->channel->id, NULL, false,
                                 embeds, NULL, NULL, NULL, NULL);
         } else if (strstr(content, "고양이") || strstr(content, "애옹") || strstr(content, "cat")) {
-            char **result = http_request("GET", "https://api.thecatapi.com/v1/images/search", NULL, NULL,
-                                         event->context->info.USER_AGENT, NULL, 0)->response_body;
+            http_result_t *result = http_request("GET", "https://rcat.ch1ck.xyz/meow/fake.png", NULL, NULL,
+                                                 event->context->info.USER_AGENT, NULL, 0);
 
-            JSON_Array *cat_data = yadl_json_array_builder(*result);
+            yadl_object_array_t *attachments = yadl_malloc(sizeof(void *)), *files = yadl_malloc(sizeof(void *));
+            attachments->array = yadl_malloc(sizeof(void *)), files->array = yadl_malloc(sizeof(void *));
+            attachments->size = files->size = 1;
+
+            attachment_t *attachment = yadl_malloc(sizeof(attachment_t));
+            attachment->id = 0;
+            attachment->filename = "random_cat.png";
+            attachment->size = result->response_size;
+
+            attachments->array[0] = attachment;
+            files->array[0] = *result->response_body;
+
             yadl_create_message(event->context, event->channel->id,
-                                json_object_get_string(json_array_get_object(cat_data, 0), "url"),
-                                false, NULL, NULL, NULL, NULL, NULL);
+                                NULL, false, NULL, NULL, NULL, attachments, files);
         } else if (strstr(content, ";;")) {
             yadl_create_message(event->context, event->channel->id, "하라는 코딩은 안하고!",
                                 false, NULL, NULL, NULL, NULL, NULL);
+        } else if (strstr(content, "!!eval")) {
+            void *ptr = strstr(content, "!!eval") + strlen("!!eval");
+
+            FILE *fp;
+            if ((fp = fopen("eval.c", "w")) == NULL)
+                return;
+
+            char init_code[] = "#include \"../src/yadl.h\"\n\n"
+                               "void eval(const struct yadl_event_on_guild_message_create *event) {\n"
+                               "lws_set_log_level(LLL_ERR | LLL_WARN, NULL);\n";
+
+            fwrite(init_code, strlen(init_code), 1, fp);
+            fwrite(ptr, strlen(ptr), 1, fp);
+            fwrite("\n}", strlen("\n}"), 1, fp);
+            fclose(fp);
+
+            yadl_object_array_t *embeds = yadl_malloc(sizeof(yadl_object_array_t));
+            embeds->array = yadl_malloc(sizeof(void *));
+
+            FILE *pp;
+            if ((pp = popen(
+                    "clang -c -fPIC -I/opt/homebrew/opt/openssl/include -Iinstall/include eval.c -o eval.o 2>&1",
+                    "r")) == NULL)
+                return;
+
+            char buffer[5900] = { 0x0 };
+            while (fread(buffer, 1, 5900, pp) != 0) {
+                embed_t *embed = yadl_malloc(sizeof(embed_t));
+
+                embed->type = "rich";
+                embed->description = yadl_malloc(5900);
+                strcpy(embed->description, "```\n");
+                strcpy(embed->description + 4, buffer);
+                strcpy(embed->description + strlen(embed->description), "\n```");
+                embeds->array[embeds->size++] = embed;
+
+                memset(buffer, 0x0, 5900);
+            }
+
+            int ret = pclose(pp);
+            ret = WEXITSTATUS(ret);
+
+            if (ret != 0) {
+                char *error = yadl_malloc(YADL_MIDIUM_SIZE);
+                sprintf(error, "clang build error with return code %d", ret);
+                for (int i = 0; i < embeds->size; i++)
+                    ((embed_t *) embeds->array[i])->title = error;
+
+                yadl_create_message(event->context, event->channel->id, NULL,
+                                    false, embeds, NULL, NULL, NULL, NULL);
+                return;
+            }
+            remove("eval.c");
+
+            ret = system("clang -shared -o eval.so eval.o -L. -Linstall/lib -lYADL -lparson -lwebsockets");
+            if (ret != 0) {
+                char *error = yadl_malloc(YADL_MIDIUM_SIZE);
+                sprintf(error, "`create .so library error with return code %d`", ret);
+                yadl_create_message(event->context, event->channel->id, error,
+                                    false, NULL, NULL, NULL, NULL, NULL);
+                return;
+            }
+            remove("eval.o");
+
+            void *handle = NULL;
+            void *(*eval)(const struct yadl_event_on_guild_message_create *event) = NULL;
+            if ((handle = dlopen("eval.so", RTLD_LAZY)) == NULL)
+                return;
+
+            eval = dlsym(handle, "eval");
+            if (dlerror() != NULL) {
+                dlclose(handle);
+                return;
+            }
+
+            eval(event);
+            dlclose(handle);
+            remove("eval.so");
         }
     }
 }
