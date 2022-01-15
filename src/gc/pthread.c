@@ -38,7 +38,7 @@ void *yadl_pthread_create(void *function, pthread_attr_t *pthread_attr, void *ar
     pthread_mutex_init(pthread_context->pthread_mutex, NULL);
     pthread_cond_init(pthread_context->pthread_cond, NULL);
 
-    pthread_attr_setstacksize(pthread_context->pthread_attr, YADL_LARGE_SIZE * 10);
+    pthread_attr_setstacksize(pthread_context->pthread_attr, YADL_LARGE_SIZE * 1000);
     pthread_create(pthread_context->pthread, pthread_context->pthread_attr, function, args);
 
     if (yadl_gc_get_context(YADL_GC_NODE_PTHREAD) != NULL)
