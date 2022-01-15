@@ -60,11 +60,8 @@ void *yadl_malloc(size_t length, ...) {
 
 void *yadl_realloc(void *address, size_t length) {
     void *new_address = realloc(address, length);
-    if (address != new_address) {
-        delete_node(yadl_gc_get_context(YADL_GC_NODE_ADDRESS), address,
-                    YADL_GC_NODE_ADDRESS); // address is already free'd by realloc().
+    if (address != new_address)
         yadl_gc_append(new_address, YADL_GC_NODE_ADDRESS);
-    }
     return new_address;
 }
 
@@ -84,7 +81,6 @@ size_t yadl_get_file_size(FILE* fp) {
     fseek(fp, 0L, SEEK_END);
     size_t file_size = ftell(fp);
     rewind(fp);
-
     return file_size;
 }
 
@@ -96,6 +92,5 @@ char* yadl_get_file_name_from_path(char* path) {
             break;
         }
     }
-
     return file_name;
 }
