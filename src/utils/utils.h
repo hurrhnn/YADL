@@ -40,7 +40,7 @@
 #elif __APPLE__ || __MACH__
     #define YADL_CLIENT_OS "Mac OS X"
 #elif __linux__
-    #define YADL_CLIENT_OS "Linux";
+    #define YADL_CLIENT_OS "Linux"
 #elif __FreeBSD__
     #define YADL_CLIENT_OS "FreeBSD"
 #elif __unix || __unix__

@@ -162,7 +162,6 @@ void scan_node(gc_node_t *main_node, gc_node_t *sub_node, int8_t node) {
                 if (i != NULL && *(void **) i != NULL && address_node != NULL) {
                     if (*(void **) i == address_node->address)
                         address_node->mark = true;
-                    }
                 }
 #else
             void *pthread_stack = pthread_get_stackaddr_np(

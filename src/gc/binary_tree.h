@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include "pthread.h"
 #include "../utils/utils.h"
 
 typedef struct gc_node {
