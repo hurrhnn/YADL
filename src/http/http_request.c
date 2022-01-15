@@ -291,6 +291,7 @@ http_request(const char *method, const char *URL, char *header, char *cookie, co
     while (n >= 0 && !http_payload->status)
         n = lws_service(context, 0);
 
+    http_result->response_size = http_payload->current_response_len;
     lwsl_user("%s %s/%s %u\n", http_payload->method, http_payload->address, http_payload->path, *http_payload->response_code);
     lwsl_hexdump_level(LLL_USER, *http_payload->response_body, http_payload->response_body_len);
 

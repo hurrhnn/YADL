@@ -26,6 +26,7 @@
 typedef struct {
     u_int32_t response_code;
     char **response_body;
+    u_int32_t response_size;
 } http_result_t;
 
 #endif //YADL_HTTP_RESULT_H
