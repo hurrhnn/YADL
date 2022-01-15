@@ -157,7 +157,7 @@ void scan_node(gc_node_t *main_node, gc_node_t *sub_node, int8_t node) {
             pthread_getattr_np(*((yadl_pthread_context_t *) main_node->address)->pthread, &pthread_attr);
             pthread_attr_getstack(&pthread_attr, &pthread_stack, &pthread_stack_size);
 
-            for (void *i = pthread_stack; i <= pthread_stack + pthread_stack_size; i += sizeof(void *)) {
+            for (void *i = pthread_stack; i <= pthread_stack + (pthread_stack_size - sizeof(void *)); i += sizeof(void *)) {
                 gc_node_t *address_node = search_node(sub_node, *(void **) i, YADL_GC_NODE_ADDRESS);
                 if (i != NULL && *(void **) i != NULL && address_node != NULL) {
                     if (*(void **) i == address_node->address)
