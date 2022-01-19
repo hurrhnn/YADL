@@ -29,10 +29,14 @@
 #include "../json/json.h"
 #include "../http/http_request.h"
 #include "../gc/pthread.h"
+#include "../impl/user.h"
+#include "../impl/impl.h"
 
 #define YADL_MAIN_CLIENT_ZLIB_SUFFIX "\x00\x00\xff\xff"
 
 #define YADL_MAIN_SESSION_ID_LENGTH (0x20 + 0x1) // 0x1 indicates null termination.
+
+typedef struct yadl_context yadl_context_t;
 
 int start_main_client(yadl_context_t *URL);
 
@@ -46,8 +50,9 @@ struct main_client_object {
     bool invalid_session;
     int64_t *heartbeat_interval;
     self_user_t *self_user;
-    char *test;
     char *session_id;
+
+    obj_list_t *guild_member_voice_states;
 };
 
 struct main_client_payload {
