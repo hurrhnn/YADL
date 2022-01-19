@@ -47,7 +47,7 @@ void *yadl_malloc(size_t length, ...) {
     va_list ap;
 
     va_start(ap, length);
-    if(va_arg(ap, size_t) == true)
+    if (va_arg(ap, size_t) == true)
         selected_node = (int8_t) YADL_NON_GC_NODE;
 
     void *address = malloc(length);
@@ -65,27 +65,27 @@ void *yadl_realloc(void *address, size_t length) {
     return new_address;
 }
 
-void yadl_free(void* address, ...) {
+void yadl_free(void *address, ...) {
     int8_t selected_node = YADL_GC_NODE_ADDRESS;
     va_list ap;
 
     va_start(ap, address);
-    if(va_arg(ap, size_t) == true)
+    if (va_arg(ap, size_t) == true)
         selected_node = (int8_t) YADL_NON_GC_NODE;
 
     delete_node(yadl_gc_get_context(selected_node), address, selected_node);
     va_end(ap);
 }
 
-size_t yadl_get_file_size(FILE* fp) {
+size_t yadl_get_file_size(FILE *fp) {
     fseek(fp, 0L, SEEK_END);
     size_t file_size = ftell(fp);
     rewind(fp);
     return file_size;
 }
 
-char* yadl_get_file_name_from_path(char* path) {
-    char* file_name = path + strlen(path);
+char *yadl_get_file_name_from_path(char *path) {
+    char *file_name = path + strlen(path);
     for (; file_name > path; file_name--) {
         if ((*file_name == '\\') || (*file_name == '/')) {
             file_name++;
@@ -93,4 +93,15 @@ char* yadl_get_file_name_from_path(char* path) {
         }
     }
     return file_name;
+}
+
+u_int16_t yadl_swap_endian_uint16(u_int16_t number) {
+    return (number >> 8) | (number << 8);
+}
+
+u_int32_t yadl_swap_endian_uint32(u_int32_t number) {
+    return ((number >> 24) & 0xFF) |
+           ((number << 8) & 0xFF0000) |
+           ((number >> 8) & 0xFF00) |
+           ((number << 24) & 0xFF000000);
 }

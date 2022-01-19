@@ -31,6 +31,10 @@
 #define YADL_MIDIUM_SIZE 0x100
 #define YADL_LARGE_SIZE  0x1000
 
+#define YADL_BYTE 0x1
+#define YADL_WORD 0x2
+#define YADL_DWORD 0x4
+
 #define YADL_SET_VALUE_IF_NULL(var, value) var = ((var) == 0 ? (var) = (value) : (var))
 
 #ifdef _WIN32
@@ -62,5 +66,9 @@ void yadl_free(void* address, ...);
 size_t yadl_get_file_size(FILE* fp);
 
 char* yadl_get_file_name_from_path(char* path);
+
+u_int16_t yadl_swap_endian_uint16(u_int16_t number);
+
+u_int32_t yadl_swap_endian_uint32(u_int32_t number);
 
 #endif //YADL_STRINGS_H
