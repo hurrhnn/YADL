@@ -29,6 +29,7 @@
 #include "utils/utils.h"
 #include "api/api.h"
 #include "impl/impl.h"
+#include "websockets/main_client.h"
 
 typedef struct yadl_context_info {
     int     API_VER, GATEWAY_VER, VOICE_VER,
@@ -57,6 +58,7 @@ typedef struct yadl_context {
     obj_list_t *guild_text_channels;
     obj_list_t *guild_voice_channels;
 
+    struct lws *main_wsi;
     void* user_data;
 } yadl_context_t;
 
