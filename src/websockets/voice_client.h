@@ -23,9 +23,6 @@
 
 #include <arpa/inet.h>
 #include "../yadl.h"
-#include "../raw/voice_udp_client.h"
-
-void yadl_init_voice_client(yadl_context_t *context, channel_t *voice_channel);
 
 typedef struct {
     size_t *heartbeat, *sequence;
@@ -37,6 +34,7 @@ typedef struct {
     bool invalid_session;
     int64_t *heartbeat_interval;
 
+    char* address;
     u_int16_t udp_port;
     u_int32_t ssrc;
 } voice_client_object_t;
@@ -60,6 +58,8 @@ typedef struct {
 
     voice_client_object_t *client_object;
 } voice_client_payload_t;
+
+void yadl_init_voice_client(yadl_context_t *context, channel_t *voice_channel, void* audio_provider, void* audio_provider_args);
 
 int start_voice_client(voice_client_payload_t *payload);
 
