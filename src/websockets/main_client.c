@@ -87,6 +87,7 @@ void main_websocket_object_init(struct main_client_payload *main_client_payload)
                                                                            yadl_malloc(sizeof(int64_t), true),
                                                                            yadl_malloc(sizeof(self_user_t), true),
                                                                            yadl_malloc(YADL_MAIN_SESSION_ID_LENGTH, true),
+                                                                           put_list((size_t) NULL, NULL, "", NULL),
                                                                            put_list((size_t) NULL, NULL, "", NULL)};
 
         pthread_cond_init(main_client_payload->client_object->main_client_cond, NULL);
@@ -222,7 +223,6 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                         }
                         on_ready->context = ws_payload->yadl_context;
                         context->callbacks.on_ready(on_ready);
-//                        pthread_join(*((yadl_pthread_context_t *) yadl_pthread_create(context->callbacks.on_ready, NULL, on_ready))->pthread, NULL);
                     } else if (!strcmp(type, "GUILD_CREATE")) {
 //                        printf("%s\n", raw);
                         guild_t *guild = parse_guild(json_object_get_wrapping_value(data_object));
@@ -296,7 +296,7 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                         voice_payload->address = malloc(YADL_MIDIUM_SIZE);
 
                         sscanf(json_object_dotget_string(data_object, "endpoint"), "%[^:]:%*d", voice_payload->address);
-                        voice_payload->path = "?v=4";
+                        voice_payload->path = context->info.VOICE_PATH;
 
                         voice_payload->server_id = json_object_dotget_string(data_object, "guild_id");
                         voice_payload->user_id = context->self_user->id;
@@ -304,7 +304,6 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                                 (obj_list_t *) get_list(ws_payload->client_object->guild_member_voice_states,(char *) voice_payload->server_id),
                                 (char *) context->self_user->id))->session_id;
                         voice_payload->token = json_object_dotget_string(data_object, "token");
-
                         yadl_pthread_create(start_voice_client, NULL, voice_payload);
 
                         /* An debug stuff, change the below text_channel id if you want. */
@@ -320,8 +319,7 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                     return -1; // Just returns -1 to disconnect.
                 }
                 case 10: {
-                    *ws_payload->client_object->heartbeat_interval = (int64_t) json_object_dotget_number(root_object,
-                                                                                                         "d.heartbeat_interval");
+                    *ws_payload->client_object->heartbeat_interval = (int64_t) json_object_dotget_number(root_object,"d.heartbeat_interval");
 
                     if (ws_payload->client_object->heartbeat_main == NULL) {
                         yadl_pthread_context_t *heartbeat_main_context = yadl_pthread_create(
@@ -417,7 +415,7 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 }
 
 static const struct lws_protocols protocols[] = {
-        {"websocket", main_websocket_callback, 0, 0, 0, NULL, 0},
+        {"main_client", main_websocket_callback, 0, 0, 0, NULL, 0},
         LWS_PROTOCOL_LIST_TERM
 };
 

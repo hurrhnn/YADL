@@ -52,6 +52,7 @@ struct main_client_object {
     self_user_t *self_user;
     char *session_id;
 
+    obj_list_t *guild_voice_providers;
     obj_list_t *guild_member_voice_states;
 };
 
