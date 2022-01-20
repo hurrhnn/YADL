@@ -19,9 +19,12 @@
 */
 
 #include "yadl.h"
-#include "websockets/main_client.h"
 
 void yadl_init(yadl_context_t *context) {
+    if (sodium_init() < 0) {
+        lwsl_err("Panic! the sodium library couldn't be initialized. exit.");
+        exit(EXIT_FAILURE);
+    }
     yadl_context_info_t *yadl_info = &context->info;
 
     YADL_SET_VALUE_IF_NULL(yadl_info->API_VER, YADL_DEFAULT_API_VER);
