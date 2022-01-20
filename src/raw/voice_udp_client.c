@@ -24,12 +24,12 @@ int voice_udp_callback(struct lws *wsi, enum lws_callback_reasons reason,
                                           OPUS_APPLICATION_AUDIO,
                                           &err);
             if (err < 0) {
-                lwsl_err("Error: failed to create an encoder - %s\n", opus_strerror(err));
+                lwsl_err("[%s] Failed to create an encoder - %s", lws_get_protocol(wsi)->name, opus_strerror(err));
                 return -1;
             }
 
             if (opus_encoder_ctl(encoder, OPUS_SET_BITRATE(OPUS_BITRATE_MAX)) < 0) {
-                printf("Error: failed to set bitrate - %s\n", opus_strerror(err));
+                printf("[%s] Failed to set bitrate - %s", lws_get_protocol(wsi)->name, opus_strerror(err));
                 return -1;
             }
             udp_payload->client_object->opus_encoder = encoder;
@@ -82,7 +82,7 @@ int voice_udp_callback(struct lws *wsi, enum lws_callback_reasons reason,
                                           YADL_VOICE_UDP_CLIENT_OPUS_FRAME_SIZE, c_bits + 32,
                                           YADL_VOICE_UDP_CLIENT_OPUS_FRAME_SIZE);
                 if (nbBytes < 0) {
-                    lwsl_err("Error: opus encode failed - %s\n", opus_strerror(nbBytes));
+                    lwsl_err("[%s] Opus encode failed - %s", lws_get_protocol(wsi)->name, opus_strerror(nbBytes));
                     return -1;
                 }
 
@@ -174,12 +174,6 @@ int start_voice_udp_client(voice_udp_client_payload_t *payload) {
     info.options = LWS_SERVER_OPTION_EXPLICIT_VHOSTS;
     info.user = payload;
 
-    context = lws_create_context(&info);
-    if (!context) {
-        lwsl_err("lws init failed.\n");
-        return 1;
-    }
-
     struct lws_protocols protocols[] = {
             {yadl_strcat("voice_udp_client_", ((voice_client_payload_t *) lws_context_user(
                     lws_get_context(payload->voice_websocket_wsi)))->server_id),
@@ -187,13 +181,19 @@ int start_voice_udp_client(voice_udp_client_payload_t *payload) {
             LWS_PROTOCOL_LIST_TERM
     };
 
+    context = lws_create_context(&info);
+    if (!context) {
+        lwsl_err("[%s] lws init failed.", protocols[0].name);
+        return 1;
+    }
+
     info.port = CONTEXT_PORT_NO_LISTEN_SERVER;
     info.protocols = protocols;
     info.fd_limit_per_thread = 10;
 
     vhost = lws_create_vhost(context, &info);
     if (!vhost) {
-        lwsl_err("lws vhost creation failed.\n");
+        lwsl_err("[%s] lws vhost creation failed.", protocols[0].name);
         lws_context_destroy(context);
         return -1;
     }
@@ -201,7 +201,7 @@ int start_voice_udp_client(voice_udp_client_payload_t *payload) {
     if (!lws_create_adopt_udp(vhost, payload->address, payload->port, 0,
                               protocols[0].name, NULL, NULL, NULL, NULL,
                               "")) {
-        lwsl_err("%s: foreign socket adoption failed\n", __func__);
+        lwsl_err("[%s] foreign socket adoption failed.", protocols[0].name);
         lws_context_destroy(context);
         return -1;
     }
@@ -209,7 +209,7 @@ int start_voice_udp_client(voice_udp_client_payload_t *payload) {
     int n = 0;
     while (n >= 0)
         n = lws_service(context, 0);
-    lwsl_user("%s", yadl_strcat(protocols[0].name, " connection closed."));
+    lwsl_user("[%s] Connection closed.", protocols[0].name);
 
     lws_context_destroy(context);
     return 0;

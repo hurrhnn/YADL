@@ -22,7 +22,7 @@
 
 void yadl_init(yadl_context_t *context) {
     if (sodium_init() < 0) {
-        lwsl_err("Panic! the sodium library couldn't be initialized. exit.");
+        lwsl_err("[global] Panic! the sodium library couldn't be initialized. exit.");
         exit(EXIT_FAILURE);
     }
     yadl_context_info_t *yadl_info = &context->info;
@@ -44,7 +44,7 @@ void yadl_init(yadl_context_t *context) {
 }
 
 void yadl_launch(yadl_context_t *context) {
-    lws_set_log_level(LLL_ERR | LLL_WARN, NULL);
+    lws_set_log_level(LLL_ERR | LLL_WARN | LLL_USER, NULL);
     start_main_client(context);
 }
 

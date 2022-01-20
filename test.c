@@ -311,7 +311,7 @@ int main(__attribute__((unused)) int argc, char **argv) {
 
     const char *token_env = getenv("TOKEN"); // get token from environment variable.
     if (token_env == NULL) {
-        lwsl_err("Token not provided. please run `TOKEN=<token> %s`.", argv[0]);
+        fprintf(stderr, "Token not provided. please run `TOKEN=<token> %s`.", argv[0]);
         exit(EXIT_FAILURE);
     }
     memcpy(context.info.TOKEN, token_env, strlen(token_env));

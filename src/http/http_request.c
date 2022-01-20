@@ -31,8 +31,8 @@ int callback_http(struct lws *wsi, enum lws_callback_reasons reason,
     http_payload_t *http_payload = lws_context_user(lws_get_context((wsi)));
     switch (reason) {
         case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
-            lwsl_err("Client Connection Error: %s\n",
-                     in ? (char *) in : "(null)");
+            lwsl_err("[%s] Client connection error. - %s",
+                     in ? (char *) in : "(null)", lws_get_protocol(wsi)->name);
             *http_payload->response_code = 0;
             http_payload->status = true;
             lws_cancel_service(lws_get_context(wsi));
@@ -134,7 +134,7 @@ int callback_http(struct lws *wsi, enum lws_callback_reasons reason,
 
         case LWS_CALLBACK_RECEIVE_CLIENT_HTTP_READ: {
             if (http_payload->data_ready) {
-                lwsl_user("RECEIVE_CLIENT_HTTP_READ: read %d\n", (int) len);
+                lwsl_header("RECEIVE_CLIENT_HTTP_READ: read %d\n", (int) len);
                 size_t before_data_len = http_payload->response_body_len;
                 http_payload->response_body_len += len;
 
@@ -152,8 +152,6 @@ int callback_http(struct lws *wsi, enum lws_callback_reasons reason,
             char buffer[YADL_LARGE_SIZE + LWS_PRE];
             char *px = buffer + LWS_PRE;
             int p_len = sizeof(buffer) - LWS_PRE;
-
-            lws_fi_user_wsi_fi(wsi, "user_reject_at_rx");
             lws_http_client_read(wsi, &px, &p_len);
             break;
         }
@@ -214,7 +212,7 @@ int notify_callback(lws_state_manager_t *mgr, __attribute__((unused)) lws_state_
     i.pwsi = &((http_payload_t *) (lws_context_user(context)))->client_wsi;
 
     if (!lws_client_connect_via_info(&i)) {
-        lwsl_err("HTTP Request creation failed..\n");
+        lwsl_err("[%s] HTTP Request creation failed..\n", protocols->name);
         *((http_payload_t *) (lws_context_user(context)))->response_code = 0;
         ((http_payload_t *) (lws_context_user(context)))->status = 1;
         lws_cancel_service(context);
@@ -284,7 +282,7 @@ http_request(const char *method, const char *URL, char *header, char *cookie, co
     context = lws_create_context(&info);
 
     if (!context) {
-        lwsl_err("lws init failed..\n");
+        lwsl_err("[%s] lws init failed..", protocols->name);
         return NULL;
     }
 
@@ -293,11 +291,11 @@ http_request(const char *method, const char *URL, char *header, char *cookie, co
         n = lws_service(context, 0);
 
     http_result->response_size = http_payload->current_response_len;
-    lwsl_user("%s %s/%s %u\n", http_payload->method, http_payload->address, http_payload->path, *http_payload->response_code);
-    lwsl_hexdump_level(LLL_USER, *http_payload->response_body, http_payload->response_body_len);
+    lwsl_header("%s %s/%s %u\n", http_payload->method, http_payload->address, http_payload->path, *http_payload->response_code);
+    lwsl_hexdump_level(LLL_HEADER, *http_payload->response_body, http_payload->response_body_len);
 
     if(*http_payload->response_code / 100 != 2)
-        lwsl_warn("%s %s/%s %u, \n%s", http_payload->method, http_payload->address, http_payload->path, *http_payload->response_code, *http_payload->response_body);
+        lwsl_warn("[%s] %s %s/%s %u, \n%s", protocols->name, http_payload->method, http_payload->address, http_payload->path, *http_payload->response_code, *http_payload->response_body);
 
     lws_context_destroy(context);
     return http_result;
