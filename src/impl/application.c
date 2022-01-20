@@ -77,48 +77,57 @@ team_member_t *parse_team_member(JSON_Value *team_member_value) {
 JSON_Value *struct_team_member(team_member_t *team_member) {
     JSON_Object *result = yadl_json_object_builder(NULL);
 
-    json_object_set_number(result, "membership_state", team_member->membership_state);
-    json_object_set_string(result, "team_id", team_member->team_id);
-    json_object_set_value(result, "user", struct_user(team_member->user));
+    if(team_member != NULL) {
+        json_object_set_number(result, "membership_state", team_member->membership_state);
+        json_object_set_string(result, "team_id", team_member->team_id);
+        json_object_set_value(result, "user", struct_user(team_member->user));
+    }
 
     return json_object_get_wrapping_value(result);
 }
 JSON_Value *struct_team(team_t *team) {
     JSON_Object *result = yadl_json_object_builder(NULL);
 
-    json_object_set_string(result, "icon", team->icon);
-    json_object_set_string(result, "id", team->id);
+    if(team != NULL) {
+        json_object_set_string(result, "icon", team->icon);
+        json_object_set_string(result, "id", team->id);
 
-    JSON_Array *members = yadl_json_array_builder(NULL);
-    for (int i=0; i<team->members->size; i++)
-        json_array_append_value(members, struct_team_member((team_member_t *)team->members->array[i]));
+        JSON_Array *members = yadl_json_array_builder(NULL);
+        if(team->members != NULL) {
+            for (int i=0; i<team->members->size; i++)
+                json_array_append_value(members, struct_team_member((team_member_t *)team->members->array[i]));
+        }
+        json_object_set_value(result, "members", json_array_get_wrapping_value(members));
 
-    json_object_set_string(result, "name", team->name);
-    json_object_set_string(result, "owner_user_id", team->owner_user_id);
+        json_object_set_string(result, "name", team->name);
+        json_object_set_string(result, "owner_user_id", team->owner_user_id);
+    }
 
     return json_object_get_wrapping_value(result);
 }
 JSON_Value *struct_application(application_t *application) {
     JSON_Object *result = yadl_json_object_builder(NULL);
 
-    json_object_set_string(result, "id", application->id);
-    json_object_set_string(result, "name", application->name);
-    json_object_set_string(result, "icon", application->icon);
-    json_object_set_string(result, "description", application->description);
-    json_object_set_string(result, "rpc_origins", application->rpc_origins);
-    json_object_set_boolean(result, "bot_public", application->bot_public);
-    json_object_set_boolean(result, "bot_require_code_grant", application->bot_require_code_grant);
-    json_object_set_string(result, "terms_of_service_url", application->terms_of_service_url);
-    json_object_set_string(result, "privacy_policy_url", application->privacy_policy_url);
-    json_object_set_value(result, "owner", struct_user(application->owner));
-    json_object_set_string(result, "summary", application->summary);
-    json_object_set_string(result, "verify_key", application->verify_key);
-    json_object_set_value(result, "team", struct_team(application->team));
-    json_object_set_string(result, "guild_id", application->guild_id);
-    json_object_set_string(result, "primary_sku_id", application->primary_sku_id);
-    json_object_set_string(result, "slug", application->slug);
-    json_object_set_string(result, "cover_image", application->cover_image);
-    json_object_set_number(result, "flags", application->flags);
+    if(application != NULL) {
+        json_object_set_string(result, "id", application->id);
+        json_object_set_string(result, "name", application->name);
+        json_object_set_string(result, "icon", application->icon);
+        json_object_set_string(result, "description", application->description);
+        json_object_set_string(result, "rpc_origins", application->rpc_origins);
+        json_object_set_boolean(result, "bot_public", application->bot_public);
+        json_object_set_boolean(result, "bot_require_code_grant", application->bot_require_code_grant);
+        json_object_set_string(result, "terms_of_service_url", application->terms_of_service_url);
+        json_object_set_string(result, "privacy_policy_url", application->privacy_policy_url);
+        json_object_set_value(result, "owner", struct_user(application->owner));
+        json_object_set_string(result, "summary", application->summary);
+        json_object_set_string(result, "verify_key", application->verify_key);
+        json_object_set_value(result, "team", struct_team(application->team));
+        json_object_set_string(result, "guild_id", application->guild_id);
+        json_object_set_string(result, "primary_sku_id", application->primary_sku_id);
+        json_object_set_string(result, "slug", application->slug);
+        json_object_set_string(result, "cover_image", application->cover_image);
+        json_object_set_number(result, "flags", application->flags);
+    }
 
     return json_object_get_wrapping_value(result);
 }

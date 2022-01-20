@@ -42,16 +42,18 @@ attachment_t *parse_attachment(JSON_Value *attachment_value) {
 JSON_Value *struct_attachment(attachment_t *attachment) {
     JSON_Object *result = yadl_json_object_builder(NULL);
 
-    json_object_set_string(result, "id", attachment->id);
-    json_object_set_string(result, "filename", attachment->filename);
-    json_object_set_string(result, "description", attachment->description);
-    json_object_set_string(result, "content_type", attachment->content_type);
-    json_object_set_number(result, "size", attachment->size);
-    json_object_set_string(result, "url", attachment->url);
-    json_object_set_string(result, "proxy_url", attachment->proxy_url);
-    json_object_set_number(result, "height", attachment->height);
-    json_object_set_number(result, "width", attachment->width);
-    json_object_set_boolean(result, "ephemeral", attachment->ephemeral);
+    if(attachment != NULL) {
+        json_object_set_string(result, "id", attachment->id);
+        json_object_set_string(result, "filename", attachment->filename);
+        json_object_set_string(result, "description", attachment->description);
+        json_object_set_string(result, "content_type", attachment->content_type);
+        json_object_set_number(result, "size", attachment->size);
+        json_object_set_string(result, "url", attachment->url);
+        json_object_set_string(result, "proxy_url", attachment->proxy_url);
+        json_object_set_number(result, "height", attachment->height);
+        json_object_set_number(result, "width", attachment->width);
+        json_object_set_boolean(result, "ephemeral", attachment->ephemeral);
+    }
 
     return json_object_get_wrapping_value(result);
 }
