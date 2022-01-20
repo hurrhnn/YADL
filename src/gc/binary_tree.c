@@ -146,7 +146,6 @@ void scan_node(gc_node_t *main_node, gc_node_t *sub_node, int8_t node) {
 
     if (node == YADL_GC_NODE_PTHREAD) {
         if (pthread_kill(*((yadl_pthread_context_t *) main_node->address)->pthread, 0) != 0) { // if target thread was dead
-            yadl_thread_remove(main_node->address);
             delete_node(main_node, main_node->address, node);
         } else {
 #if __linux__
