@@ -36,6 +36,8 @@
 #define YADL_DWORD 0x4
 
 #define YADL_SET_VALUE_IF_NULL(var, value) var = ((var) == 0 ? (var) = (value) : (var))
+#define YADL_MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define YADL_MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 #ifdef _WIN32
     #define YADL_CLIENT_OS "Windows 32-bit"
