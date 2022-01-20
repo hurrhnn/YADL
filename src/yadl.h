@@ -24,12 +24,15 @@
 #include <libwebsockets.h>
 #include <strings.h>
 #include <stdlib.h>
+#include <sodium/core.h>
 
 #include "utils/info.h"
 #include "utils/utils.h"
 #include "api/api.h"
 #include "impl/impl.h"
 #include "websockets/main_client.h"
+#include "websockets/voice_client.h"
+#include "raw/voice_udp_client.h"
 
 typedef struct yadl_context_info {
     int     API_VER, GATEWAY_VER, VOICE_VER,

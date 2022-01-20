@@ -437,4 +437,3 @@ JSON_Value *struct_guild(guild_t *guild) {
 
     return json_object_get_wrapping_value(result);
 }
-

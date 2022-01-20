@@ -43,7 +43,6 @@ int callback_http(struct lws *wsi, enum lws_callback_reasons reason,
             lws_get_peer_simple(wsi, buf, sizeof(buf));
             *http_payload->response_code = lws_http_client_http_response(wsi);
             http_payload->data_ready = true;
-            lws_fi_user_wsi_fi(wsi, "user_reject_at_est");
             break;
         }
 
@@ -88,10 +87,10 @@ int callback_http(struct lws *wsi, enum lws_callback_reasons reason,
 
                     } else if (content_type_pos != NULL) {
                         size_t offset = strlen("Content-Type: ");
-                        size_t auth_len = strlen(content_type_pos + offset);
+                        size_t c_type_len = strlen(content_type_pos + offset);
                         if (lws_add_http_header_by_token(wsi, WSI_TOKEN_HTTP_CONTENT_TYPE,
                                                          (const unsigned char *) content_type_pos + offset,
-                                                         (int) auth_len, p, end)) {
+                                                         (int) c_type_len, p, end)) {
                             *http_payload->response_code = 0;
                             return -1;
                         }
@@ -198,7 +197,9 @@ int notify_callback(lws_state_manager_t *mgr, __attribute__((unused)) lws_state_
 
     i.ssl_connection |= LCCSCF_H2_QUIRK_OVERFLOWS_TXCR |
                         LCCSCF_ACCEPT_TLS_DOWNGRADE_REDIRECTS |
-                        LCCSCF_H2_QUIRK_NGHTTP2_END_STREAM;
+                        LCCSCF_H2_QUIRK_NGHTTP2_END_STREAM |
+                        LCCSCF_IP_LOW_LATENCY |
+                        LCCSCF_IP_HIGH_THROUGHPUT;
 
     i.alpn = "http/1.1";
     i.ssl_connection |= LCCSCF_SKIP_SERVER_CERT_HOSTNAME_CHECK;
@@ -213,7 +214,7 @@ int notify_callback(lws_state_manager_t *mgr, __attribute__((unused)) lws_state_
     i.pwsi = &((http_payload_t *) (lws_context_user(context)))->client_wsi;
 
     if (!lws_client_connect_via_info(&i)) {
-        lwsl_err("Request creation failed..\n");
+        lwsl_err("HTTP Request creation failed..\n");
         *((http_payload_t *) (lws_context_user(context)))->response_code = 0;
         ((http_payload_t *) (lws_context_user(context)))->status = 1;
         lws_cancel_service(context);
