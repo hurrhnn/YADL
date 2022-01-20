@@ -36,6 +36,6 @@ void yadl_json_lws_write(struct lws *client_wsi, JSON_Object *root_object) {
     char *json_payload = yadl_malloc(YADL_LARGE_SIZE);
     json_serialize_to_buffer_pretty(json_object_get_wrapping_value(root_object), json_payload + LWS_PRE, YADL_LARGE_SIZE - LWS_PRE);
 
-    lws_write(client_wsi, (unsigned char *) json_payload + LWS_PRE, strlen(json_payload + LWS_PRE), LWS_WRITE_BINARY);
+    lws_write(client_wsi, (unsigned char *) json_payload + LWS_PRE, strlen(json_payload + LWS_PRE), LWS_WRITE_TEXT);
     json_value_free(json_object_get_wrapping_value(root_object));
 }
