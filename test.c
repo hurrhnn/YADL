@@ -22,6 +22,28 @@
 #include <dlfcn.h>
 #include "src/yadl.h"
 
+unsigned char *provide_20ms_raw_audio_callback(void *args) {
+    int *fd = args;
+    struct timeval timeout;
+    fd_set read_fds;
+    unsigned char *pcm_bytes = yadl_malloc(YADL_VOICE_UDP_CLIENT_OPUS_FRAME_SIZE * YADL_VOICE_UDP_CLIENT_OPUS_CHANNELS * YADL_WORD);
+
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 5 * 1000;
+
+    FD_ZERO(&read_fds);
+    FD_SET(*fd, &read_fds);
+    int res = select(*fd + 1, &read_fds, NULL, NULL, &timeout);
+
+    /* return empty audio data if socks timeout. */
+    if (res > 0) {
+        /* Read a 16 bits/sample audio frame. */
+        read(*fd, pcm_bytes, YADL_VOICE_UDP_CLIENT_OPUS_FRAME_SIZE * YADL_VOICE_UDP_CLIENT_OPUS_CHANNELS * YADL_WORD);
+    }
+
+    return pcm_bytes;
+}
+
 void on_ready(const struct yadl_event_on_ready *event) {
     printf("YADL v%s Library Test Started.\n\n", YADL_VERSION);
     application_t *application = yadl_retrieve_application_info(event->context);
@@ -215,7 +237,7 @@ void on_guild_message_create(const struct yadl_event_on_guild_message_create *ev
                     "r")) == NULL)
                 return;
 
-            char buffer[5900] = { 0x0 };
+            char buffer[5900] = {0x0};
             while (fread(buffer, 1, 5900, pp) != 0) {
                 embed_t *embed = yadl_malloc(sizeof(embed_t));
 
@@ -268,6 +290,17 @@ void on_guild_message_create(const struct yadl_event_on_guild_message_create *ev
             eval(event);
             dlclose(handle);
             remove("eval.so");
+        } else if (strstr(content, "!!voice ")) {
+            const char *fifo_pipe = yadl_strcat(event->guild->id, ".pipe");
+            remove(fifo_pipe);
+            mkfifo(fifo_pipe, 0777);
+
+            int *fifo_fd = yadl_malloc(sizeof(int));
+            *fifo_fd = open(fifo_pipe, O_RDWR);
+
+            void *ptr = strstr(content, "!!voice ") + strlen("!!voice ");
+            yadl_init_voice_client(event->context, get_list(event->context->guild_voice_channels, ptr),
+                                   provide_20ms_raw_audio_callback, fifo_fd);
         }
     }
 }
