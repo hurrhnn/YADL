@@ -9,5 +9,5 @@ Yet Another Discord Library
 
 e.g.
 ```bash
-youtube-dl --quiet -f bestaudio "[Youtube Video URL]" -o - | ffmpeg  -i pipe: -f s16le -ac 2 -ar 48000 -acodec pcm_s16le - | > ./928872876965249065.pipe
+youtube-dl --quiet -f bestaudio "[Youtube Video URL]" -o - | ffmpeg  -i pipe: -f s16le -ac 2 -ar 48000 -acodec pcm_s16le - > ./928872876965249065.pipe
 ```
