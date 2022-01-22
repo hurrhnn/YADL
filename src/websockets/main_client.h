@@ -58,7 +58,7 @@ struct main_client_object {
 
 struct main_client_payload {
     yadl_context_t *yadl_context;
-    struct lws *client_wsi;
+    struct lws *main_client_wsi;
     struct lws_context *context;
 
     char *address;

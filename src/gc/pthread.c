@@ -27,13 +27,13 @@ void *yadl_pthread_create(void *function, pthread_attr_t *pthread_attr, void *ar
 
     yadl_pthread_context_t *pthread_context = yadl_malloc(sizeof(yadl_pthread_context_t), true);
     if(pthread_attr == NULL) {
-        pthread_attr = yadl_malloc(sizeof(pthread_attr_t), true);
+        pthread_attr = yadl_malloc(sizeof(pthread_attr_t));
         pthread_attr_init(pthread_attr);
     }
-    *pthread_context = (yadl_pthread_context_t) {yadl_malloc(sizeof(pthread_t), true),
+    *pthread_context = (yadl_pthread_context_t) {yadl_malloc(sizeof(pthread_t)),
                                                  pthread_attr,
-                                                 yadl_malloc(sizeof(pthread_mutex_t), true),
-                                                 yadl_malloc(sizeof(pthread_cond_t), true)};
+                                                 yadl_malloc(sizeof(pthread_mutex_t)),
+                                                 yadl_malloc(sizeof(pthread_cond_t))};
 
     pthread_mutex_init(pthread_context->pthread_mutex, NULL);
     pthread_cond_init(pthread_context->pthread_cond, NULL);
@@ -43,6 +43,8 @@ void *yadl_pthread_create(void *function, pthread_attr_t *pthread_attr, void *ar
 
     if (yadl_gc_get_context(YADL_GC_NODE_PTHREAD) != NULL)
         yadl_gc_append(pthread_context, YADL_GC_NODE_PTHREAD);
+
+    pthread_attr_destroy(pthread_attr);
     return pthread_context;
 }
 
@@ -51,12 +53,4 @@ void yadl_pthread_append(pthread_t pthread) {
     *pthread_context = (yadl_pthread_context_t) {yadl_malloc(sizeof(pthread_t), true), NULL, NULL, NULL};
     memcpy(pthread_context->pthread, &pthread, sizeof(pthread_t));
     yadl_gc_append(pthread_context, YADL_GC_NODE_PTHREAD);
-}
-
-void yadl_thread_remove(yadl_pthread_context_t *pthread_context) {
-    gc_node_t *non_gc_node = yadl_gc_get_context((int8_t) YADL_NON_GC_NODE);
-    delete_node(non_gc_node, pthread_context->pthread, (int8_t)YADL_NON_GC_NODE);
-    delete_node(non_gc_node, pthread_context->pthread_attr, (int8_t)YADL_NON_GC_NODE);
-    delete_node(non_gc_node, pthread_context->pthread_mutex, (int8_t)YADL_NON_GC_NODE);
-    delete_node(non_gc_node, pthread_context->pthread_cond, (int8_t)YADL_NON_GC_NODE);
 }
