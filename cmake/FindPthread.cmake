@@ -1,0 +1,39 @@
+FIND_PATH(PTHREAD_INCLUDE_DIR pthread.h
+        "$ENV{PTHREAD_HOME}/include"
+        "$ENV{PTHREAD_DIR}/include"
+        /usr/include
+        "C:/MinGW/include"
+        )
+
+FIND_LIBRARY(PTHREAD_LIBRARY
+        NAMES pthread pthreadGC2 pthreadVSE pthreadGCE pthreadGC pthreadVC1 pthreadVC2
+        PATHS
+        "$ENV{PTHREAD_HOME}/lib"
+        "$ENV{PTHREAD_DIR}/lib"
+        /usr/lib
+        /usr/local/lib
+        /lib
+        "C:/MinGW/lib"
+        )
+
+IF(PTHREAD_LIBRARY)
+    SET(PTHREAD_LIBRARIES ${PTHREAD_LIBRARY})
+ELSE(PTHREAD_LIBRARY)
+    MESSAGE(SEND_ERROR "pthread library not found.")
+ENDIF(PTHREAD_LIBRARY)
+
+IF(NOT PTHREAD_INCLUDE_DIR)
+    MESSAGE(SEND_ERROR "pthread include dir not found.")
+ENDIF(NOT PTHREAD_INCLUDE_DIR)
+
+IF(PTHREAD_LIBRARIES AND PTHREAD_INCLUDE_DIR)
+    SET(PTHREAD_INCLUDE_DIRS ${PTHREAD_INCLUDE_DIR})
+    SET(PTHREAD_FOUND TRUE)
+ELSE(PTHREAD_LIBRARIES AND PTHREAD_INCLUDE_DIR)
+    SET(PTHREAD_FOUND FALSE)
+ENDIF(PTHREAD_LIBRARIES AND PTHREAD_INCLUDE_DIR)
+
+MARK_AS_ADVANCED(
+        PTHREAD_INCLUDE_DIR
+        PTHREAD_LIBRARY
+)
