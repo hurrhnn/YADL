@@ -20,8 +20,8 @@
 
 #include "voice_client.h"
 
-void yadl_init_voice_client(yadl_context_t *context, channel_t *voice_channel, void *audio_provider,
-                            void *audio_provider_args) {
+void yadl_audio_open_connection(yadl_context_t *context, channel_t *voice_channel, void *audio_provider,
+                                void *audio_provider_args) {
     void *guild_voice_provider = yadl_malloc(sizeof(void *) * 2);
     ((void **) guild_voice_provider)[0] = audio_provider;
     ((void **) guild_voice_provider)[1] = audio_provider_args;
@@ -33,6 +33,16 @@ void yadl_init_voice_client(yadl_context_t *context, channel_t *voice_channel, v
     json_object_dotset_number(voice_state_update, "op", 4);
     json_object_dotset_string(voice_state_update, "d.channel_id", voice_channel->id);
     json_object_dotset_string(voice_state_update, "d.guild_id", voice_channel->guild_id);
+    json_object_dotset_boolean(voice_state_update, "d.self_mute", false);
+    json_object_dotset_boolean(voice_state_update, "d.self_deaf", false);
+    yadl_json_lws_write(context->main_wsi, voice_state_update);
+}
+
+void yadl_audio_close_connection(yadl_context_t *context, guild_t *guild) {
+    JSON_Object *voice_state_update = yadl_json_object_builder(NULL);
+    json_object_dotset_number(voice_state_update, "op", 4);
+    json_object_dotset_null(voice_state_update, "d.channel_id");
+    json_object_dotset_string(voice_state_update, "d.guild_id", guild->id);
     json_object_dotset_boolean(voice_state_update, "d.self_mute", false);
     json_object_dotset_boolean(voice_state_update, "d.self_deaf", false);
     yadl_json_lws_write(context->main_wsi, voice_state_update);
@@ -58,7 +68,7 @@ void voice_websocket_schedule_callback(lws_sorted_usec_list_t *sul) {
     i.path = voice_payload->path;
     i.host = i.address;
     i.ssl_connection = LCCSCF_USE_SSL;
-    i.pwsi = &voice_payload->client_wsi;
+    i.pwsi = &voice_payload->voice_client_wsi;
 
     const u_int32_t backoff_ms[] = {1000, 2000, 3000, 4000, 5000};
     lws_retry_bo_t *retry = yadl_malloc(sizeof(lws_retry_bo_t), true);
@@ -117,7 +127,7 @@ void *voice_websocket_send_heartbeat(voice_client_payload_t *ws_payload) {
         JSON_Object *root_object = yadl_json_object_builder(NULL);
         json_object_dotset_number(root_object, "op", 3);
         json_object_dotset_number(root_object, "d", (double) (*ws_payload->client_object->heartbeat += 1));
-        yadl_json_lws_write(ws_payload->client_wsi, root_object);
+        yadl_json_lws_write(ws_payload->voice_client_wsi, root_object);
 
         gettimeofday(&tv, NULL);
         long future_us = tv.tv_usec + *ws_payload->client_object->heartbeat_interval * 1000;
@@ -135,17 +145,22 @@ int voice_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                              __attribute__((unused)) void *user, void *in, size_t len) {
     yadl_pthread_append(pthread_self());
     voice_client_payload_t *ws_payload = lws_context_user(lws_get_context((wsi)));
-    ws_payload->client_wsi = wsi;
+    ws_payload->voice_client_wsi = wsi;
 
     switch (reason) {
         case LWS_CALLBACK_WSI_CREATE: {
+            *ws_payload->alive = true;
             voice_websocket_object_init(ws_payload);
             break;
         }
 
+        case LWS_CALLBACK_WSI_DESTROY:
+            *ws_payload->alive = false;
+            break;
+
         case LWS_CALLBACK_CLIENT_CONNECTION_ERROR: {
             lwsl_err("[%s] Client connection error. - %s",
-                     in ? (char *) in : "(null)", lws_get_protocol(wsi)->name);
+                     in ? (char *) in : "(null)\n", lws_get_protocol(wsi)->name);
             voice_websocket_connection_retry(wsi, &ws_payload->sul, voice_websocket_schedule_callback,
                                              &ws_payload->retry_count);
             break;
@@ -187,7 +202,7 @@ int voice_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 
                     int sock_fd;
                     if ((sock_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
-                        lwsl_err("[%s] socket creation failed.", lws_get_protocol(wsi)->name);
+                        lwsl_err("[%s] socket creation failed.\n", lws_get_protocol(wsi)->name);
                         return EXIT_FAILURE;
                     }
                     char buffer[0x4a + 1];
@@ -211,7 +226,7 @@ int voice_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                     }
 
                     if (!inet_pton(AF_INET, (char *) ip_discovery_packet.data.address, &server_address.sin_addr)) {
-                        lwsl_err("[%s] Convert Internet host address Failed.", lws_get_protocol(wsi)->name);
+                        lwsl_err("[%s] Convert Internet host address Failed.\n", lws_get_protocol(wsi)->name);
                         ws_payload->connection_exhausted = true;
                         return EXIT_FAILURE;
                     }
@@ -227,8 +242,11 @@ int voice_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                     ws_payload->client_object->udp_port = yadl_swap_endian_uint16(ip_discovery_packet.data.port);
                     ws_payload->client_object->ssrc = yadl_swap_endian_uint32(ip_discovery_packet.data.ssrc);
 
-                    lwsl_user("[%s] IP Discovered Address: %s:%d, SSRC: %d", lws_get_protocol(wsi)->name, ip_discovery_packet.data.address,
-                            ws_payload->client_object->udp_port, ws_payload->client_object->ssrc);
+                    lwsl_user("[%s] Discord Voice UDP Address: %s:%d, SSRC: %d\n", lws_get_protocol(wsi)->name,
+                              json_object_dotget_string(data_object, "ip"),
+                              (u_int16_t) json_object_dotget_number(data_object, "port"), ws_payload->client_object->ssrc);
+                    lwsl_user("[%s] IP Discovered Address: %s:%d\n", lws_get_protocol(wsi)->name, ip_discovery_packet.data.address,
+                            ws_payload->client_object->udp_port);
 
                     JSON_Object *select_protocol_json = yadl_json_object_builder(NULL);
                     json_object_dotset_number(select_protocol_json, "op", 1);
@@ -247,7 +265,8 @@ int voice_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 
                 case 4: {
                     voice_udp_client_payload_t *voice_udp_payload = yadl_malloc(sizeof(voice_udp_client_payload_t));
-                    voice_udp_payload->voice_websocket_wsi = wsi;
+                    voice_udp_payload->alive = ws_payload->alive;
+                    voice_udp_payload->voice_client_wsi = wsi;
                     voice_udp_payload->address = ws_payload->client_object->address;
                     voice_udp_payload->port = ws_payload->client_object->udp_port;
                     voice_udp_payload->ssrc = ws_payload->client_object->ssrc;
@@ -287,16 +306,16 @@ int voice_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
                         ws_payload->client_object->heartbeat_voice = heartbeat_main_context->pthread;
                         ws_payload->client_object->voice_heartbeat_cond = heartbeat_main_context->pthread_cond;
                         ws_payload->client_object->voice_heartbeat_mutex = heartbeat_main_context->pthread_mutex;
-                        lwsl_user("[%s] Started voice heartbeat thread..", lws_get_protocol(wsi)->name);
+                        lwsl_user("[%s] Started voice heartbeat thread..\n", lws_get_protocol(wsi)->name);
 
                         voice_websocket_wait_signal(ws_payload->client_object->voice_client_mutex,
                                                     ws_payload->client_object->voice_client_cond, NULL);
 
                         /* An debug stuff, change the below text_channel id if you want. */
-                        lwsl_user("[%s] Successfully Connected & Identified!", lws_get_protocol(wsi)->name);
+                        lwsl_user("[%s] Successfully Connected & Identified!\n", lws_get_protocol(wsi)->name);
                     } else {
                         pthread_cond_signal(ws_payload->client_object->voice_heartbeat_cond);
-                        lwsl_user("[%s] Sent signal to exist heartbeat thread..", lws_get_protocol(wsi)->name);
+                        lwsl_user("[%s] Sent signal to exist heartbeat thread..\n", lws_get_protocol(wsi)->name);
 
                         voice_websocket_wait_signal(ws_payload->client_object->voice_client_mutex,
                                                     ws_payload->client_object->voice_client_cond, NULL);
@@ -329,7 +348,7 @@ int voice_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
             memcpy(&code, in, 0x2);
             memcpy(close_reason, in + 0x2, len - 0x2);
 
-            lwsl_err("[%s] Server disconnected websocket connection. (%d) - %s", lws_get_protocol(wsi)->name, ntohs(code), close_reason);
+            lwsl_err("[%s] Server disconnected websocket connection. (%d) - %s\n", lws_get_protocol(wsi)->name, ntohs(code), close_reason);
             switch (ntohs(code)) {
                 case 4004:
                 case 4014:
@@ -344,7 +363,7 @@ int voice_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 
         case LWS_CALLBACK_CLIENT_CLOSED:
             if (!ws_payload->connection_exhausted) {
-                lwsl_err("[%s] Client disconnected websocket connection. trying to reconnect..", lws_get_protocol(wsi)->name);
+                lwsl_err("[%s] Client disconnected websocket connection. trying to reconnect..\n", lws_get_protocol(wsi)->name);
                 voice_websocket_connection_retry(wsi, &ws_payload->sul, voice_websocket_schedule_callback,
                                                  &ws_payload->retry_count);
             } else

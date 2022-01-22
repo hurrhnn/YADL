@@ -41,7 +41,7 @@ typedef struct {
 
 typedef struct {
     yadl_context_t *yadl_context;
-    struct lws *client_wsi;
+    struct lws *voice_client_wsi;
     struct lws_context *context;
 
     char *address;
@@ -49,7 +49,7 @@ typedef struct {
     lws_sorted_usec_list_t sul;
     uint16_t retry_count;
 
-    bool connection_exhausted;
+    bool *alive, connection_exhausted;
 
     const char* server_id;
     const char* user_id;
@@ -59,7 +59,9 @@ typedef struct {
     voice_client_object_t *client_object;
 } voice_client_payload_t;
 
-void yadl_init_voice_client(yadl_context_t *context, channel_t *voice_channel, void* audio_provider, void* audio_provider_args);
+void yadl_audio_open_connection(yadl_context_t *context, channel_t *voice_channel, void* audio_provider, void* audio_provider_args);
+
+void yadl_audio_close_connection(yadl_context_t *context, guild_t *guild);
 
 int start_voice_client(voice_client_payload_t *payload);
 
