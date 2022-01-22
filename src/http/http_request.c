@@ -31,8 +31,8 @@ int callback_http(struct lws *wsi, enum lws_callback_reasons reason,
     http_payload_t *http_payload = lws_context_user(lws_get_context((wsi)));
     switch (reason) {
         case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
-            lwsl_err("[%s] Client connection error. - %s",
-                     in ? (char *) in : "(null)", lws_get_protocol(wsi)->name);
+            lwsl_err("[%s] Client connection error. - %s\n",
+                     in ? (char *) in : "(null)\n", lws_get_protocol(wsi)->name);
             *http_payload->response_code = 0;
             http_payload->status = true;
             lws_cancel_service(lws_get_context(wsi));
@@ -291,7 +291,7 @@ http_request(const char *method, const char *URL, char *header, char *cookie, co
         n = lws_service(context, 0);
 
     http_result->response_size = http_payload->current_response_len;
-    lwsl_header("%s %s/%s %u\n", http_payload->method, http_payload->address, http_payload->path, *http_payload->response_code);
+    lwsl_header("[%s] %s %s/%s %u\n", protocols->name, http_payload->method, http_payload->address, http_payload->path, *http_payload->response_code);
     lwsl_hexdump_level(LLL_HEADER, *http_payload->response_body, http_payload->response_body_len);
 
     if(*http_payload->response_code / 100 != 2)
