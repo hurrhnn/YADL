@@ -290,7 +290,7 @@ void on_guild_message_create(const struct yadl_event_on_guild_message_create *ev
             eval(event);
             dlclose(handle);
             remove("eval.so");
-        } else if (strstr(content, "!!voice ")) {
+        } else if (strstr(content, "!!connect ")) {
             const char *fifo_pipe = yadl_strcat(event->guild->id, ".pipe");
             remove(fifo_pipe);
             mkfifo(fifo_pipe, 0777);
@@ -298,10 +298,11 @@ void on_guild_message_create(const struct yadl_event_on_guild_message_create *ev
             int *fifo_fd = yadl_malloc(sizeof(int));
             *fifo_fd = open(fifo_pipe, O_RDWR);
 
-            void *ptr = strstr(content, "!!voice ") + strlen("!!voice ");
-            yadl_init_voice_client(event->context, get_list(event->context->guild_voice_channels, ptr),
-                                   provide_20ms_raw_audio_callback, fifo_fd);
-        }
+            void *str_ptr = strstr(content, "!!connect ") + strlen("!!connect ");
+            yadl_audio_open_connection(event->context, get_list(event->context->guild_voice_channels, str_ptr),
+                                       provide_20ms_raw_audio_callback, fifo_fd);
+        } else if (!strcmp(content, "!!disconnect"))
+            yadl_audio_close_connection(event->context, event->guild);
     }
 }
 
@@ -311,7 +312,7 @@ int main(__attribute__((unused)) int argc, char **argv) {
 
     const char *token_env = getenv("TOKEN"); // get token from environment variable.
     if (token_env == NULL) {
-        fprintf(stderr, "Token not provided. please run `TOKEN=<token> %s`.", argv[0]);
+        fprintf(stderr, "Token not provided. please run `TOKEN=<token> %s`.\n", argv[0]);
         exit(EXIT_FAILURE);
     }
     memcpy(context.info.TOKEN, token_env, strlen(token_env));
