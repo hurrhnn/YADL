@@ -63,11 +63,13 @@ typedef struct {
     OpusEncoder *opus_encoder;
     bool speak;
 
-    u_int64_t start_time;
+    struct timespec start_time;
 } voice_udp_client_object_t;
 
 typedef struct {
-    struct lws *voice_websocket_wsi;
+    bool *alive;
+    struct lws *voice_udp_client_wsi;
+    struct lws *voice_client_wsi;
     char* address;
     u_int16_t port;
     u_int32_t ssrc;
