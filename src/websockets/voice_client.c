@@ -343,12 +343,14 @@ int voice_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 
         case LWS_CALLBACK_WS_PEER_INITIATED_CLOSE: {
             int16_t code;
-            char *close_reason = yadl_malloc(len - 1);
+            char *close_reason = yadl_malloc(3 + len - 1);
 
             memcpy(&code, in, 0x2);
-            memcpy(close_reason, in + 0x2, len - 0x2);
+            strcpy(close_reason, " - ");
+            memcpy(close_reason + 3, in + 0x2, len - 0x2);
 
-            lwsl_err("[%s] Server disconnected websocket connection. (%d) - %s\n", lws_get_protocol(wsi)->name, ntohs(code), close_reason);
+            lwsl_err("[%s] Server disconnected websocket connection. (%d)%s\n", lws_get_protocol(wsi)->name, yadl_swap_endian_uint16(code),
+                     !strlen(close_reason + 3) ? "" : close_reason);
             switch (ntohs(code)) {
                 case 4004:
                 case 4014:

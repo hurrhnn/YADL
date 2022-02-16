@@ -383,8 +383,10 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
             strcpy(close_reason, " - ");
             memcpy(close_reason + 3, in + 0x2, len - 0x2);
 
-            lwsl_err("[%s] Server disconnected websocket connection. (%d) - %s\n", lws_get_protocol(wsi)->name, yadl_swap_endian_uint16(code), close_reason);
+            lwsl_err("[%s] Server disconnected websocket connection. (%d)%s\n", lws_get_protocol(wsi)->name, yadl_swap_endian_uint16(code),
+                     !strlen(close_reason + 3) ? "" : close_reason);
             switch (yadl_swap_endian_uint16(code)) {
+                case 4003:
                 case 4004:
                     ws_payload->connection_exhausted = true;
                     break;
