@@ -23,7 +23,7 @@
 
 char *yadl_strrem(const char *str, const char *sub) {
     char *copy_str = yadl_malloc(strlen(str));
-    memcpy(copy_str, str, strlen(str));
+    strcpy(copy_str, str);
     size_t len = strlen(sub);
 
     if (len > 0) {
@@ -37,7 +37,7 @@ char *yadl_strrem(const char *str, const char *sub) {
 
 char *yadl_strcat(const char *str1, const char *str2) {
     char *str = yadl_malloc(strlen(str1) + strlen(str2) + 1);
-    memcpy(str, str1, strlen(str1));
+    strcpy(str, str1);
     memcpy(str + strlen(str1), str2, strlen(str2) + 1);
     return str;
 }
