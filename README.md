@@ -4,12 +4,12 @@ Yet Another Discord Library
 ### Building
 #### Requirements
 ```bash
-libm libz libdl pthread openssl libopus libsodium libwebsockets libcap(linux only)
+libm libz libdl libuv pthread openssl libopus libsodium libwebsockets libcap(linux only)
 ```
 
 1. create a `build` directory at the project root directory.
 2. enter `build` directory.
-3. `cmake ..` and `make` to build YADL library.
+3. `cmake ..` and `make` to build YADL library. (cmake argument - `YADL_BUILD_DEPS` is available.)
 
 ### Test codes
 #### Voice Connection
