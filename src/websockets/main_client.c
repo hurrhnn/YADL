@@ -188,17 +188,17 @@ int main_websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
             u_int8_t op_code = (u_int8_t) json_object_dotget_number(root_object, "op");
             JSON_Object *data_object = json_object_dotget_object(root_object, "d");
 
-            if (context->user_data != NULL &&
-                !(strstr(raw, "MESSAGE_CREATE") != NULL && strstr(raw, context->self_user->id) != NULL)) {
-                char *pretty_raw = yadl_strcat(yadl_strcat("```json\n", raw), "\n```");
-                char *content = yadl_malloc(2000);
-                if (strlen(pretty_raw) >= 2000) {
-                    memcpy(content, pretty_raw, 1991);
-                    strcpy(content + 1991, " ...\n```");
-                } else
-                    content = pretty_raw;
-                yadl_create_message(context, context->user_data, content, false, NULL, NULL, NULL, NULL, NULL);
-            }
+//            if (context->user_data != NULL &&
+//                !(strstr(raw, "MESSAGE_CREATE") != NULL && strstr(raw, context->self_user->id) != NULL)) {
+//                char *pretty_raw = yadl_strcat(yadl_strcat("```json\n", raw), "\n```");
+//                char *content = yadl_malloc(2000);
+//                if (strlen(pretty_raw) >= 2000) {
+//                    memcpy(content, pretty_raw, 1991);
+//                    strcpy(content + 1991, " ...\n```");
+//                } else
+//                    content = pretty_raw;
+//                yadl_create_message(context, context->user_data, content, false, NULL, NULL, NULL, NULL, NULL);
+//            }
 
             switch (op_code) {
                 case 0: {
