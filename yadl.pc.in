@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: YADL
+Description: An Yet Another Discord Library written in C.
+URL: https://github.com/hurrhnn/YADL
+Version: @VERSION@
+Requires:
+Conflicts:
+Libs: -L${libdir} -lyadl

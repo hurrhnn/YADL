@@ -70,4 +70,4 @@ dkms.conf
 submodules/
 build/
 cmake-build-build-coverage/
-src/utils/info.h
+include/yadl/config.h

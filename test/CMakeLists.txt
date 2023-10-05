@@ -1,0 +1,12 @@
+function(make_test name)
+    add_executable(${name} ${ARGN})
+    target_link_libraries(${name} PRIVATE YADL)
+    target_include_directories(${name} PRIVATE ${PROJECT_SOURCE_DIR}/test)
+    add_test(NAME ${name} COMMAND ${name} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test)
+endfunction()
+
+file(GLOB test_sources "${PROJECT_SOURCE_DIR}/test/*.c")
+foreach(test_source ${test_sources})
+    get_filename_component(source_name ${test_source} NAME_WE)
+    make_test(${source_name} ${test_source})
+endforeach()
