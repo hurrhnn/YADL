@@ -18,8 +18,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "audit_log.h"
-#include "impl.h"
+#include <yadl/impl/audit_log.h>
+#include <yadl/impl/impl.h>
 
 audit_log_t *parse_audit_log(JSON_Value *audit_log_value) {
     JSON_Object *audit_log = json_object(audit_log_value);

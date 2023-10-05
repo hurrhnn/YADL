@@ -18,8 +18,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "main_client.h"
-#include "voice_client.h"
+#include <yadl/websockets/main_client.h>
+#include <yadl/websockets/voice_client.h>
 
 static const u_int32_t backoff_ms[] = {1000, 2000, 3000, 4000, 5000};
 

@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "voice_udp_client.h"
+#include <yadl/raw/voice_udp_client.h>
 
 void voice_udp_object_init(voice_udp_client_payload_t *payload) {
     if (payload->client_object == NULL) {

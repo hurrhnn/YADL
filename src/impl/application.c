@@ -18,8 +18,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "application.h"
-#include "impl.h"
+#include <yadl/impl/application.h>
+#include <yadl/impl/impl.h>
 
 application_t *parse_application(JSON_Value *application_value) {
     JSON_Object *application = json_object(application_value);

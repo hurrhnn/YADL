@@ -17,7 +17,7 @@
     You should have received a copy of the GNU General Public License
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-#include "callback.h"
+#include <yadl/callback/callback.h>
 
 yadl_object_metadata_t *yadl_get_object_metadata(size_t type) {
     yadl_object_metadata_t *metadata = yadl_malloc(sizeof(yadl_object_metadata_t));

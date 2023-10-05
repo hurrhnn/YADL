@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "integration.h"
+#include <yadl/impl/integration.h>
 
 integration_t *parse_integration(JSON_Value *integration_value) {
     JSON_Object *integration = json_object(integration_value);

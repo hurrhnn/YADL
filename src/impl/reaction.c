@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "reaction.h"
+#include <yadl/impl/reaction.h>
 
 reaction_t *parse_reaction(JSON_Value *reaction_value) {
     JSON_Object *reaction = json_object(reaction_value);

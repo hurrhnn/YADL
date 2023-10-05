@@ -24,8 +24,8 @@
  Copyright (C) 2021 Wonjun Jung (KokoseiJ), Rhnn Hur (hurrhnn)
 */
 
-#include "linked_list.h"
-#include "impl.h"
+#include <yadl/impl/linked_list.h>
+#include <yadl/impl/impl.h>
 
 obj_list_t *put_list(size_t type, obj_list_t *list, char *key, void *value) {
     if (list == NULL) {

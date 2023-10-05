@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "retrieve_application_info.h"
+#include <yadl/api/retrieve_application_info.h>
 
 application_t *yadl_retrieve_application_info(yadl_context_t *context) {
     char *retrieve_application_info = yadl_malloc(YADL_MIDIUM_SIZE),

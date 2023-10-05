@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "voice.h"
+#include <yadl/impl/voice.h>
 
 voice_state_t *parse_voice_state(JSON_Value *voice_state_value) {
     JSON_Object *voice_state = json_object(voice_state_value);

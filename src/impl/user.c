@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "user.h"
+#include <yadl/impl/user.h>
 
 user_t *parse_user(JSON_Value *user_value) {
     JSON_Object *user = json_object(user_value);

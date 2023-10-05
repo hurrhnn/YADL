@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "attachment.h"
+#include <yadl/impl/attachment.h>
 
 attachment_t *parse_attachment(JSON_Value *attachment_value) {
     JSON_Object *attachment = json_object(attachment_value);

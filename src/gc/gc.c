@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "gc.h"
+#include "yadl/gc/gc.h"
 
 void yadl_gc_init() {
     yadl_gc_context_t.non_gc_node = insert_node(NULL, yadl_malloc(sizeof(void *), true));

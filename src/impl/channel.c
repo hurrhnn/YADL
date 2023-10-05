@@ -18,8 +18,9 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "channel.h"
-#include "impl.h"
+#include <yadl/impl/impl.h>
+#include <yadl/impl/channel.h>
+#include <yadl/impl/impl.h>
 
 channel_t *parse_channel(JSON_Value *channel_value) {
     JSON_Object *channel = json_object(channel_value);

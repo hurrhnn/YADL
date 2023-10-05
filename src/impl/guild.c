@@ -18,8 +18,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "guild.h"
-#include "impl.h"
+#include <yadl/impl/guild.h>
+#include <yadl/impl/impl.h>
 
 guild_t *parse_guild(JSON_Value *guild_value) {
     JSON_Object *guild = json_object(guild_value);

@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "voice_client.h"
+#include <yadl/websockets/voice_client.h>
 
 void yadl_audio_open_connection(yadl_context_t *context, channel_t *voice_channel, void *audio_provider,
                                 void *audio_provider_args) {

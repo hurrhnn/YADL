@@ -24,8 +24,8 @@
  Copyright (C) 2021 Wonjun Jung (KokoseiJ), Rhnn Hur (hurrhnn)
 */
 
-#include "binary_tree.h"
-#include "../gc/gc.h"
+#include <yadl/gc/binary_tree.h>
+#include <yadl/gc/gc.h>
 
 #if __linux__
 pthread_mutex_t node_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER_NP;

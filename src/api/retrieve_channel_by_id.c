@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "retrieve_channel_by_id.h"
+#include <yadl/api/retrieve_channel_by_id.h>
 
 channel_t *yadl_retrieve_channel_by_id(yadl_context_t *context, char* channel_id) {
     char *retrieve_channel_by_id = yadl_malloc(YADL_MIDIUM_SIZE),

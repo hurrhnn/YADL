@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "emoji.h"
+#include <yadl/impl/emoji.h>
 
 emoji_t *parse_emoji(JSON_Value *emoji_value) {
     JSON_Object *emoji = json_object(emoji_value);

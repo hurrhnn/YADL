@@ -21,21 +21,6 @@
 #ifndef YADL_IMPL_INL_H
 #define YADL_IMPL_INL_H
 
-#include <parson.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include "linked_list.h"
 
-typedef struct yadl_context yadl_context_t;
-typedef struct yadl_object_metadata yadl_object_metadata_t;
-typedef struct yadl_object_array yadl_object_array_t;
-
-bool yadl_object_overridable(size_t type);
-
-void *yadl_object_override(obj_list_t *list, char* key, void* object, yadl_object_metadata_t *metadata);
-
-void yadl_object_init(yadl_context_t *context);
-
-yadl_object_array_t *yadl_object_array_parse(size_t type, JSON_Array *json_array);
 
 #endif //YADL_IMPL_INL_H

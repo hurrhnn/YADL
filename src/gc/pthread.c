@@ -18,8 +18,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "pthread.h"
-#include "gc.h"
+#include <yadl/gc/pthread.h>
+#include <yadl/gc/gc.h>
 
 void *yadl_pthread_create(void *function, pthread_attr_t *pthread_attr, void *args) {
     if(!function)

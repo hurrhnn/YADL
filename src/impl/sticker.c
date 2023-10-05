@@ -18,8 +18,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "sticker.h"
-#include "impl.h"
+#include <yadl/impl/sticker.h>
+#include <yadl/impl/impl.h>
 
 sticker_t *parse_sticker(JSON_Value *sticker_value) {
     JSON_Object *sticker = json_object(sticker_value);

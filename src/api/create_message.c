@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "create_message.h"
+#include <yadl/api/create_message.h>
 
 void yadl_create_message(yadl_context_t *context, const char *channel_id, const char *content, bool is_tts,
                          yadl_object_array_t *embeds,

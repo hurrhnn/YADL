@@ -18,8 +18,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "embed.h"
-#include "impl.h"
+#include <yadl/impl/embed.h>
+#include <yadl/impl/impl.h>
 
 embed_t *parse_embed(JSON_Value *embed_value) {
     JSON_Object *embed = json_object(embed_value);

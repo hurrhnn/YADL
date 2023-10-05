@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "json.h"
+#include <yadl/json/json.h>
 
 JSON_Object *yadl_json_object_builder(const char *raw) {
     return raw == NULL ? json_value_get_object(json_value_init_object()) : json_object(json_parse_string(raw));

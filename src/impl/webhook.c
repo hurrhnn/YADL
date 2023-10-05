@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "webhook.h"
+#include <yadl/impl/webhook.h>
 
 webhook_t *parse_webhook(JSON_Value *webhook_value) {
     JSON_Object *webhook = json_object(webhook_value);

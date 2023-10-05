@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "retrieve_user_by_id.h"
+#include <yadl/api/retrieve_user_by_id.h>
 
 user_t *yadl_retrieve_user_by_id(yadl_context_t *context, char* user_id) {
     char *retrieve_user = yadl_malloc(YADL_MIDIUM_SIZE),

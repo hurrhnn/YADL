@@ -18,8 +18,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "utils.h"
-#include "../gc/gc.h"
+#include <yadl/utils/utils.h>
+#include <yadl/gc/gc.h>
 
 char *yadl_strrem(const char *str, const char *sub) {
     char *copy_str = yadl_malloc(strlen(str));

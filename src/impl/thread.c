@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "thread.h"
+#include <yadl/impl/thread.h>
 
 thread_metadata_t *parse_thread_metadata(JSON_Value *thread_metadata_value) {
     JSON_Object *thread_metadata = json_object(thread_metadata_value);

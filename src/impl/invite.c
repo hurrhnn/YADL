@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "invite.h"
+#include <yadl/impl/invite.h>
 
 invite_t *parse_invite(JSON_Value *invite_value) {
     JSON_Object *invite = json_object(invite_value);

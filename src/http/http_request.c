@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "http_request.h"
+#include <yadl/http/http_request.h>
 
 const lws_retry_bo_t http_retry = {
         .secs_since_valid_ping = 3,

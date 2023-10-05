@@ -44,7 +44,7 @@ void yadl_init(yadl_context_t *context) {
 }
 
 void yadl_launch(yadl_context_t *context) {
-    lws_set_log_level(LLL_ERR | LLL_WARN | LLL_USER, NULL);
+    lws_set_log_level(LLL_ERR | LLL_WARN | LLL_USER | LLL_HEADER, NULL);
     start_main_client(context);
 }
 

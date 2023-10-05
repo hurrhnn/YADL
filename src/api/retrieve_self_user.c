@@ -18,7 +18,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "retrieve_self_user.h"
+#include <yadl/api/retrieve_self_user.h>
 
 self_user_t *yadl_retrieve_self_user(yadl_context_t *context) {
     char *retrieve_self_user = yadl_malloc(YADL_MIDIUM_SIZE),

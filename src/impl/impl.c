@@ -18,8 +18,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "impl.h"
-#include "../yadl.h"
+#include <yadl.h>
+#include "impl-inl.h"
 
 void yadl_object_init(yadl_context_t *context) {
     context->guilds = put_list(YADL_OBJECT_GUILD, NULL, "", NULL);

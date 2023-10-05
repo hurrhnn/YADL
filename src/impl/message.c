@@ -18,8 +18,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "message.h"
-#include "impl.h"
+#include <yadl/impl/message.h>
+#include <yadl/impl/impl.h>
 
 message_t *parse_referenced_message(JSON_Value *parse_referenced_message) {
     JSON_Object *referenced_message = json_object(parse_referenced_message);
